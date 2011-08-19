@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<head>
+<title>:: jQueryUI datagrid ::</title>
+<meta http-equiv="content-type" content="text/html; charset=iso-9959-1" /> 
+<meta http-equiv="content-language" content="pt-br" />
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css" />
+<link href="../css/jquery.ui.datagrid.css" rel="stylesheet" type="text/css" />
+<style>
+#data-grid-local {width:500px;margin:0 auto}
+.ui-corner-bottom { -moz-border-radius-bottomleft: 2px; -webkit-border-bottom-left-radius: 2px; border-bottom-left-radius: 2px; -moz-border-radius-bottomright: 2px; -webkit-border-bottom-right-radius: 2px; border-bottom-right-radius: 2px; }
+.ui-corner-right {  -moz-border-radius-topright: 2px; -webkit-border-top-right-radius: 2px; border-top-right-radius: 2px; -moz-border-radius-bottomright: 2px; -webkit-border-bottom-right-radius: 2px; border-bottom-right-radius: 2px; }
+.ui-corner-left { -moz-border-radius-topleft: 2px; -webkit-border-top-left-radius: 2px; border-top-left-radius: 2px; -moz-border-radius-bottomleft: 2px; -webkit-border-bottom-left-radius: 2px; border-bottom-left-radius: 2px; }
+.ui-corner-all { -moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px; }
+</style>
+</head>
+<body>
+<div id="data-grid-local"></div>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+<script type="text/javascript" src="../minified/jquery.ui.datagrid.min.js"></script>
+<script>
+(function($){
+    var $dgLocal = $('#data-grid-local')
+    
+    $dgLocal.datagrid({
+        jsonStore: {
+            data: {"rows":[
+                {"id":"1","nome":"Fulano de Tal","empresa":"Empresa 1"}
+                ,{"id":"2","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"3","nome":"Beltrano da Silva","empresa":"Empresa do tal"}
+                ,{"id":"4","nome":"Beltrano da Silva","empresa":"Empresa 123122"}
+                ,{"id":"5","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"6","nome":"Beltrano da Silva","empresa":"Empresa 3312"}
+                ,{"id":"7","nome":"Beltrano da Silva","empresa":"Empresa 312"}
+                ,{"id":"8","nome":"Beltrano da Silva","empresa":"Empresa 3123122"}
+                ,{"id":"9","nome":"Fulano de Tal","empresa":"Empresa 221"}
+                ,{"id":"10","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"11","nome":"Beltrano da Silva","empresa":"Empresa 3123122"}
+                ,{"id":"12","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"13","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"14","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"15","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"16","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"17","nome":"Fulano de Tal","empresa":"Empresa 2"}
+                ,{"id":"18","nome":"Beltrano da Silva","empresa":"Empresa 1232"}
+                ,{"id":"18","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"20","nome":"Fulano de Tal","empresa":"Empresa 2"}
+                ,{"id":"21","nome":"Beltrano da Silva","empresa":"Empresa23 2"}
+                ,{"id":"22","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"23","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
+            ]}
+        }
+        ,pagination:false
+        ,mapper:[{
+            name: 'id',alias:'Código',css:{width:50,textAlign:'center'}
+        },{
+            name: 'nome',alias:'Nome',css:{width:200,textAlign:'left'}
+        },{
+            name: 'empresa',alias:'Empresa',css:{textAlign:'left'}
+        }]
+    })
+    
+})(jQuery)
+</script>
+</body> 
+</html>
