@@ -32,7 +32,7 @@
 			,rowHover: true
 			,rowClick: true
 			,rowNumber: false
-			,ajaxMethod: 'POST'
+			,ajaxMethod: 'GET'
 			,autoRender: true
 			,autoLoad: true
 			,title: ''
@@ -44,15 +44,14 @@
 		
 			// plugin params elements
 			this.uiDataGrid = $(this._getMarkup());
-			this.uiDataGridChilds = this.uiDataGrid.children();
-			this.uiDataGridTables = this.uiDataGridChilds.find('table');
+			this.uiDataGridTables = this.uiDataGrid.find('table.ui-datagrid');
 			this.uiDataGridThead = $(this.uiDataGridTables[0].tHead);
 			this.uiDataGridTheadBody = $(this.uiDataGridTables[1].tHead);
 			this.uiDataGridTbody = $(this.uiDataGridTables[1].tBodies[0]);
 			this.uiDataGridTfoot = (this.options.pagination || $.isArray(this.options.toolBarButtons))
 				? $(this.uiDataGridTables[2].tBodies[0])
 				: $([]);
-			this.uiDataGridScroll = this.uiDataGridTables.eq(0).parent().next();
+			this.uiDataGridScroll = $(this.uiDataGridTables[1].parentNode).height(this.options.height);
 			
 			// plugin params
 			this._offset = 0;
@@ -61,8 +60,7 @@
 			
 			this._tbodyEvents();
 			
-			delete this.uiDataGridTables;
-			delete this.uiDataGridChilds
+			this.uiDataGridTables = this.uiDataGridChilds = null
 		}
 		,_init: function() {
 			(this.options.autoRender && this.render());
@@ -71,50 +69,54 @@
 			$.Widget.prototype._setOption.apply(this,arguments);
 		}
 		,_getMarkup: function() {
-			var _div = document.createElement('div'),markup = '';
-			_div.className = 'ui-data-grid-container ui-widget'+((this.options.containerBorder) ? ' ui-widget-content ui-corner-all' : '');
-			_div.style.cssText = 'padding:1px';
+			var _div = document.createElement('div')
+				,markup = '';
+			
+			_div.className = 'ui-datagrid-container ui-widget'+((this.options.containerBorder) ? ' ui-widget-content ui-corner-all' : '');
 			
 			if (this.options.title != '') {
-				markup += '<div style="text-align: center; padding: 0.4em 0pt" class="ui-widget-header ui-corner-all">'
+				markup += '<div class="ui-widget-header ui-datagrid-title ui-corner-all">'
 						+this.options.title
 					+'</div>'
 				+'<div>'	
 			}
 			
-			markup += '<div>'
-					+'<table cellspacing="0" cellpadding="0" class="ui-datagrid" role="grid">'
-						+'<thead>'
-							+'<tr role="rowheader"></tr>'
-						+'</thead>'
+			// markup
+			markup += '<div class="'+this.options.classThead+' ui-datagrid-header ">'
+					+'<table cellspacing="0" cellpadding="0">'
+						+'<tr>'
+							+'<td>'
+								+'<table class="ui-datagrid">'
+									+'<thead>'
+										+'<tr></tr>'
+									+'</thead>'
+								+'</table>'
+							+'</td>'
+							+'<td style="width:16px"></td>'
+						+'</tr>'
 					+'</table>'
 				+'</div>'
-				+'<div class="ui-widget-content" style="height:'+this.options.height+'px;overflow-y:scroll;overflow-x:hidden;border:0 !important">'
-					+'<table cellspacing="0" cellpadding="0" class="ui-datagrid ui-datagrid-tbody" role="grid">'
+				+'<div class="ui-datagrid-body">'
+					+'<table class="ui-datagrid">'
 						+'<thead>'
-							+'<tr role="rowheader"></tr>'
+							+'<tr></tr>'
 						+'</thead>'
 						+'<tbody></tbody>'
 					+'</table>'
 				+'</div>';
 			
 			if (this.options.pagination || $.isArray(this.options.toolBarButtons)) {
-				markup += '<div class="ui-widget ui-state-default ui-corner-all" style="margin-top:1px">'
-					+'<table cellspacing="0" cellpadding="0" style="width:100%">'
+				markup += '<div class="ui-widget ui-state-default ui-corner-all ui-datagrid-tools">'
+					+'<table class="ui-datagrid">'
 						+'<tbody>'
 							+'<tr>'
-								+'<td style="padding:2px;text-align:left">&nbsp;</td>';
+								+'<td>&nbsp;</td>';
 			
 				if (this.options.pagination) {
-					markup += '<td style="text-align:right;padding:2px">'									
-						+'<span style="margin-right:5px"></span>'
-					+'</td>';
+					markup += '<td><span></span></td>';
 				}
 			
-				markup += '</tr>'
-							+'</tbody>'
-						+'</table>'
-					+'</div>';
+				markup += '</tr></tbody></table></div>';
 			}
 			
 			if (this.options.title != '') {
@@ -164,10 +166,6 @@
 				aux = document.createElement('th');
 				aux.className = cls;
 				
-				if (i > 1) {
-					aux.style.borderLeftWidth = '0';
-				}
-				
 				// helper
 				var html = undefined !== _th.alias ? _th.alias : _th.name
 					,$helper = $(document.createElement('div')).addClass('ui-widget ui-state-default').css({overflow:'scroll',position:'absolute',left:0}).html(html).appendTo(document.body);
@@ -191,21 +189,15 @@
 			
 			$(row).last().width('auto')
 			
-			aux = document.createElement('th');
-			aux.innerHtml = '&nbsp';
-			aux.className = cls;
-			aux.style.cssText = 'border-left-width:0;width:17px;padding:0';
-			row[row.length] = aux;
-			
 			if (this.options.rowNumber) {
 				aux = document.createElement('th');
-				aux.className = cls+' ui-datagrid-cell-rownumber';
-				aux.style.cssText = 'width:20px;border-right-width:0';
+				aux.className = this.options.classThead+' ui-datagrid-cell-rownumber';
+				aux.innerHTML = '<div></div>'
 				row.splice(0,0,aux)
 			}
 			
 			// last cell tbody
-			$( $([this.uiDataGridThead[0].rows[0],this.uiDataGridTheadBody[0].rows[0]]).append(row).last()[0].cells ).last().css('background','none');
+			$([this.uiDataGridThead[0].rows[0],this.uiDataGridTheadBody[0].rows[0]]).append(row);
 			
 			row = aux = _th = null;
 		}
@@ -217,14 +209,11 @@
 			
 			for(var cls = 'ui-widget ui-widget-content',row,cell,item,i=0,j=0;item = json.rows[i++];) {
 				row = document.createElement('tr');
-				row.style.cssText = 'cursor:default';
-				row.className = 'ui-datagrid-row-'+((i%2) ? 'odd' : 'even');
 
 				if (this.options.rowNumber) {
 					cell = document.createElement('td');
-					cell.className = this.options.classThead;
-					cell.style.cssText = 'width:20px;text-align:center;vertical-align:middle;border-width:0 0 0 1px;padding:0';
-					cell.innerHTML = parseInt(this._offset) + i;
+					cell.className = this.options.classThead+' ui-datagrid-cell-rownumber';
+					cell.innerHTML = '<div>'+(parseInt(this._offset) + i)+'</div>';
 					row.appendChild(cell)
 				}
 				
@@ -236,11 +225,7 @@
 					row.appendChild(cell);
 					
 					// default
-					cell.style.cssText = 'overflow:hidden;border-width:0 1px 0 1px;background:0;text-align:'+theadThs[cell.cellIndex].style.textAlign;
-					
-					if (j > 1) {
-						cell.style.borderLeftWidth = '0';
-					}
+					cell.style.cssText = 'text-align:'+theadThs[cell.cellIndex].style.textAlign;
 					
 					// apply the css text-align
 					if ( (undefined != _td.css) && (_td.css.hasOwnProperty('textAlign')) ) {
@@ -265,7 +250,7 @@
 				j = 0;
 				row = cell = null
 			}
-			$(this.uiDataGridTbody[0].rows).last().children().css('border-bottom-width','1px');
+			
 			row = cell = theadThs = null;
 			i = y = 0
 		}
@@ -295,20 +280,15 @@
 					type: self.options.ajaxMethod.toLowerCase()
 					,url: self.options.jsonStore.url.replace(/\?.*/,'')
 					,data: self.options.jsonStore.params
+					,dataType: 'json'
 					,success: function(json) {
-						try {
-							json = $.parseJSON(json);
-						} catch (e) {
-							alert(json.split('#').join("\n"));
-							return
-						}
-						
+
 						if (undefined != json.error) {
 							alert(json.error);
 							return;
 						}
 						
-						if (json.numRows == 0) {
+						if (undefined === json.numRows || json.numRows == 0) {
 							return false;
 						}
 						
@@ -369,16 +349,13 @@
 				self._createColumns();
 				
 				// dimensions
-				var w = self.uiDataGrid.width()
-					h = self.uiDataGridThead.outerHeight();
+				var h = self.uiDataGridThead.outerHeight();
 				
 				// grid scorll width
-				self.uiDataGridScroll.width(w);
 				self.uiDataGridTheadBody
 					.parent()
-					.width(w)
 					.css('marginTop',-h);
-				w = h = null;
+				h = null;
 				
 				if (self.options.pagination) {
 				
@@ -442,9 +419,11 @@
 			ev = null
 		}
 		,_clickRow: function(tr,event) {
-			var self = this;
-			if ($(tr).hasClass('ui-state-highlight')) {
-				$(tr).removeClass('ui-state-highlight');
+			var self = this
+				$tr = $(tr)
+				cls = $tr.hasClass('ui-state-highlight');
+			if (cls) {
+				$tr.removeClass('ui-state-highlight');
 				
 				for(var i=0,row;row=self._selectedRows[i++];) {
 					if (tr === row) {
@@ -454,19 +433,21 @@
 				}
 				
 			} else {
-				$(tr).addClass('ui-state-highlight');
+				$tr.addClass('ui-state-highlight');
 				self._selectedRows[self._selectedRows.length] = tr;
 				($.isFunction(self.options.onSelectRow) && self.options.onSelectRow.call(tr,[self.element[0]]))
 			}
+			
+			$tr = cls = null;
 		}
 		,resize: function() {
 			var self = this;
 			// fit to parent
 			if (self.options.fit) {
-				self.uiDataGridScroll.each(function(){
+				(function(){
 					var h = self.uiDataGrid.outerHeight() - self.element.height();
 					this.style.height = $(this).height() - h +'px';
-				})
+				}).call(self.uiDataGridScroll[0]);
 			}
 			
 			return this
@@ -480,7 +461,7 @@
 				$(row).removeClass('ui-state-highlight');
 			}
 			
-			this._selectedRows = []
+			this._selectedRows = [];
 		}
 		,load: function() {
 			this._ajax()
