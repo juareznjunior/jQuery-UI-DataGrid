@@ -5,18 +5,13 @@
 .ui-datagrid-header .ui-state-default:first-child { border-left:0 }
 .ui-datagrid-body {height:200px;overflow:scroll;overflow-x:hidden}
 .ui-datagrid-body thead .ui-state-default {border-bottom:0}
-
-.ui-datagrid-body .ui-state-hover
-,.ui-datagrid-body .ui-state-highlight {border:0}
-
-.ui-datagrid-body .ui-state-highlight .ui-widget-content
-,.ui-datagrid-body .ui-state-hover .ui-widget-content {font-weight:normal;background:none}
-
+.ui-datagrid-body .ui-state-hover ,.ui-datagrid-body .ui-state-highlight {border:0}
+.ui-datagrid-body .ui-state-highlight .ui-widget-content ,.ui-datagrid-body .ui-state-hover .ui-widget-content {font-weight:normal;background:none}
 .ui-datagrid-header .ui-state-default,.ui-datagrid-body .ui-state-default,.ui-datagrid-body .ui-widget-content { border-width:0 1px 0 1px; padding: 3px 1px}
-.ui-datagrid-body tr:last-child .ui-widget-content 
-,.ui-datagrid-body tr:last-child .ui-state-default { border-width:0 1px 1px 1px;}
+.ui-datagrid-body tr:last-child .ui-widget-content,.ui-datagrid-body tr:last-child .ui-state-default { border-width:0 1px 1px 1px;}
 .ui-datagrid-tools {margin-top:0.1em}
 .ui-datagrid-tools td {padding: 3px 1px}
 .ui-datagrid-tools td:last-child {text-align:right}
+.ui-datagrid-tools td:last-child .ui-button-icon-only .ui-button-text ,.ui-datagrid-tools td:last-child .ui-button-icons-only .ui-button-text { padding:1px}
 .ui-datagrid-cell-rownumber {width:20px}
 .ui-datagrid-cell-rownumber div {text-align:center;width:20px;overflow:hidden}

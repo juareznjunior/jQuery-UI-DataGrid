@@ -209,6 +209,7 @@
 			
 			for(var cls = 'ui-widget ui-widget-content',row,cell,item,i=0,j=0;item = json.rows[i++];) {
 				row = document.createElement('tr');
+				row.className = (i%2) ? 'ui-datagrid-row-even' : 'ui-datagrid-row-odd';
 
 				if (this.options.rowNumber) {
 					cell = document.createElement('td');
@@ -320,7 +321,7 @@
 		,render: function() {
 			var self = this;
 			
-			if (self.element.children().eq(0).hasClass('ui-data-grid-container')) {
+			if (self.element.children().eq(0).hasClass('ui-datagrid-container')) {
 				self.resetOffset();
 				self.load()
 			} else {
@@ -351,7 +352,7 @@
 				// dimensions
 				var h = self.uiDataGridThead.outerHeight();
 				
-				// grid scorll width
+				// negative margin
 				self.uiDataGridTheadBody
 					.parent()
 					.css('marginTop',-h);
