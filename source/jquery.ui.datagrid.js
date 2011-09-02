@@ -207,7 +207,7 @@
 			this.uiDataGridTbody.empty();
 			this.uiDataGridScroll.scrollTop(0);
 			
-			for(var cls = 'ui-widget ui-widget-content',row,cell,item,i=0,j=0;item = json.rows[i++];) {
+			for(var cls = 'ui-widget ui-widget-content',row,cell,item,_td,i=0,j=0;item = json.rows[i++];) {
 				row = document.createElement('tr');
 				row.className = (i%2) ? 'ui-datagrid-row-even' : 'ui-datagrid-row-odd';
 
@@ -284,7 +284,7 @@
 					,dataType: 'json'
 					,success: function(json) {
 
-						if (undefined != json.error) {
+						if (undefined !== json.error) {
 							alert(json.error);
 							return;
 						}
@@ -293,30 +293,39 @@
 							return false;
 						}
 						
-						if (self.options.pagination) {
-						
-							self._totalPages = Math.ceil(json.numRows / self.options.limit);
-							var currentPage = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1)
-								,infoPages = currentPage+' de '+self._totalPages+' ('+json.numRows+')';
-							
-							// ultimo td
-							$.each($(self.uiDataGridTfoot[0].rows[0].cells).eq(-1).children(),function(){
-								if (/span/i.test(this.tagName)) {
-									this.innerHTML = infoPages
-								} else {
-									(/data-grid-button-(first|prev)/.test(this.name))
-										? (self._offset > 0 && this.disabled && $(this).button('enable'))
-										: (self._totalPages > currentPage && this.disabled && $(this).button('enable'))
-								}
-							})
-						}
-						
-						self._createRows(json)
+						self._createRows(json);
+						self._pagination(json.numRows);
 					}
 				})
 			} else {
 				self._createRows(self.options.jsonStore.data)
 			}
+		}
+		,_pagination: function(numRows) {
+			var self = this;
+			
+			if (self.options.pagination) {
+
+				// total pages
+				self._totalPages = Math.ceil(numRows / self.options.limit);
+				
+				// current and info
+				var currentPage = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1)
+					,infoPages = currentPage+' de '+self._totalPages+' ('+numRows+')';
+				
+				// last cell
+				$.each($(self.uiDataGridTfoot[0].rows[0].cells).eq(-1).children(),function(){
+					if (/span/i.test(this.tagName)) {
+						this.innerHTML = infoPages
+					} else {
+						(/data-grid-button-(first|prev)/.test(this.name))
+							? (self._offset > 0 && this.disabled && $(this).button('enable'))
+							: (self._totalPages > currentPage && this.disabled && $(this).button('enable'))
+					}
+				})
+			}
+			
+			self = null;
 		}
 		,render: function() {
 			var self = this;
