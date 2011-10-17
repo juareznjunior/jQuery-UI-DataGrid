@@ -36,9 +36,9 @@
 			,autoRender: true
 			,autoLoad: true
 			,title: ''
-			,classThead: 'ui-state-default'
 			,containerBorder: true
 			,fit: false
+			,onComplete: false
 		}
 		,_create: function() {
 		
@@ -82,18 +82,20 @@
 			}
 			
 			// markup
-			markup += '<div class="'+this.options.classThead+' ui-datagrid-header ">'
+			markup += '<div class="ui-state-default ui-datagrid-header ">'
 					+'<table cellspacing="0" cellpadding="0">'
-						+'<tr>'
-							+'<td>'
-								+'<table class="ui-datagrid">'
-									+'<thead>'
-										+'<tr></tr>'
-									+'</thead>'
-								+'</table>'
-							+'</td>'
-							+'<td style="width:16px"></td>'
-						+'</tr>'
+						+'<thead>'
+							+'<tr>'
+								+'<td>'
+									+'<table class="ui-datagrid">'
+										+'<thead>'
+											+'<tr></tr>'
+										+'</thead>'
+									+'</table>'
+								+'</td>'
+								+'<td style="width:16px"></td>'
+							+'</tr>'
+						+'</thead>'
 					+'</table>'
 				+'</div>'
 				+'<div class="ui-datagrid-body">'
@@ -107,7 +109,7 @@
 			
 			if (this.options.pagination || $.isArray(this.options.toolBarButtons)) {
 				markup += '<div class="ui-widget ui-state-default ui-corner-all ui-datagrid-tools">'
-					+'<table class="ui-datagrid">'
+					+'<table cellspacing="0" cellpadding="0" class="ui-datagrid">'
 						+'<tbody>'
 							+'<tr>'
 								+'<td>&nbsp;</td>';
@@ -162,7 +164,7 @@
 		}
 		,_createColumns: function() {
 		
-			for(var cls = 'ui-widget '+this.options.classThead,aux,row = [],_th,i=0,_w=0;_th = this.options.mapper[i++];) {
+			for(var cls = 'ui-widget ui-state-default',aux,row = [],_th,i=0,_w=0;_th = this.options.mapper[i++];) {
 				aux = document.createElement('th');
 				aux.className = cls;
 				
@@ -191,7 +193,7 @@
 			
 			if (this.options.rowNumber) {
 				aux = document.createElement('th');
-				aux.className = this.options.classThead+' ui-datagrid-cell-rownumber';
+				aux.className = 'ui-state-default ui-datagrid-cell-rownumber';
 				aux.innerHTML = '<div></div>'
 				row.splice(0,0,aux)
 			}
@@ -207,13 +209,13 @@
 			this.uiDataGridTbody.empty();
 			this.uiDataGridScroll.scrollTop(0);
 			
-			for(var cls = 'ui-widget ui-widget-content',row,cell,item,_td,i=0,j=0;item = json.rows[i++];) {
+			for(var cls = 'ui-widget ui-widget-content',row,cell,item,i=0,j=0;item = json.rows[i++];) {
 				row = document.createElement('tr');
 				row.className = (i%2) ? 'ui-datagrid-row-even' : 'ui-datagrid-row-odd';
 
 				if (this.options.rowNumber) {
 					cell = document.createElement('td');
-					cell.className = this.options.classThead+' ui-datagrid-cell-rownumber';
+					cell.className = 'ui-state-default ui-datagrid-cell-rownumber';
 					cell.innerHTML = '<div>'+(parseInt(this._offset) + i)+'</div>';
 					row.appendChild(cell)
 				}
@@ -233,9 +235,6 @@
 						$(cell).css('textAlign',_td.css.textAlign);
 					}
 					
-					// width normalize
-					cell.style.width = $(theadThs[cell.cellIndex]).width()+'px';
-					
 					// cell content
 					cell.innerHTML = $.isFunction(_td.map)
 						? _td.map(item[_td.name]) // aplica uma função no valor do campo
@@ -253,7 +252,7 @@
 			}
 			
 			row = cell = theadThs = null;
-			i = y = 0
+			i = y = 0;
 		}
 		,_ajax: function() {
 			var self = this;
@@ -284,53 +283,44 @@
 					,dataType: 'json'
 					,success: function(json) {
 
-						if (undefined !== json.error) {
+						if (undefined != json.error) {
 							alert(json.error);
 							return;
 						}
 						
-						if (undefined === json.numRows || json.numRows == 0) {
+						if (undefined === json.num_rows || json.num_rows == 0) {
 							return false;
 						}
 						
-						self._createRows(json);
-						self._pagination(json.numRows);
+						if (self.options.pagination) {
+						
+							self._totalPages = Math.ceil(json.num_rows / self.options.limit);
+							var currentPage = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1)
+								,infoPages = currentPage+' de '+self._totalPages+' ('+json.num_rows+')';
+							
+							// ultimo td
+							$.each($(self.uiDataGridTfoot[0].rows[0].cells).eq(-1).children(),function(){
+								if (/span/i.test(this.tagName)) {
+									this.innerHTML = infoPages
+								} else {
+									(/data-grid-button-(first|prev)/.test(this.name))
+										? (self._offset > 0 && this.disabled && $(this).button('enable'))
+										: (self._totalPages > currentPage && this.disabled && $(this).button('enable'))
+								}
+							})
+						}
+						
+						self._createRows(json)
 					}
 				})
 			} else {
 				self._createRows(self.options.jsonStore.data)
 			}
 		}
-		,_pagination: function(numRows) {
-			var self = this;
-			
-			if (self.options.pagination) {
-
-				// total pages
-				self._totalPages = Math.ceil(numRows / self.options.limit);
-				
-				// current and info
-				var currentPage = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1)
-					,infoPages = currentPage+' de '+self._totalPages+' ('+numRows+')';
-				
-				// last cell
-				$.each($(self.uiDataGridTfoot[0].rows[0].cells).eq(-1).children(),function(){
-					if (/span/i.test(this.tagName)) {
-						this.innerHTML = infoPages
-					} else {
-						(/data-grid-button-(first|prev)/.test(this.name))
-							? (self._offset > 0 && this.disabled && $(this).button('enable'))
-							: (self._totalPages > currentPage && this.disabled && $(this).button('enable'))
-					}
-				})
-			}
-			
-			self = null;
-		}
 		,render: function() {
 			var self = this;
 			
-			if (self.element.children().eq(0).hasClass('ui-datagrid-container')) {
+			if ( self._active() ) {
 				self.resetOffset();
 				self.load()
 			} else {
@@ -361,7 +351,7 @@
 				// dimensions
 				var h = self.uiDataGridThead.outerHeight();
 				
-				// negative margin
+				// grid scorll width
 				self.uiDataGridTheadBody
 					.parent()
 					.css('marginTop',-h);
@@ -449,6 +439,9 @@
 			}
 			
 			$tr = cls = null;
+		}
+		,_active: function() {
+			return this.element.children(':eq(0)').hasClass('ui-datagrid-container')
 		}
 		,resize: function() {
 			var self = this;
