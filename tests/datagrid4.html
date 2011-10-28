@@ -56,24 +56,18 @@
         ,toolBarButtons:[{
             label: 'Load'
             ,icon: 'arrowthickstop-1-s'
-            ,fn: function(dg) {
-                $(dg).datagrid('load');
-                $(this).trigger('mouseleave.button').button('disable');
+            ,fn: function(event) {
+                $(this).datagrid('load');
+                $(event.currentTarget).trigger('mouseleave.button').button('disable');
             }
         },{
-            label: 'Get Selected Rows'
-            ,icon: 'calculator'
-            ,fn: function(dg) {
-                alert($(dg).datagrid('getSelectedRows').join())
-            }
-        },{
-            label: 'Clear Selected Rows'
+            label: 'Clear Selected Row'
             ,icon: 'refresh'
-            ,fn: function(dg){
-                $(dg).datagrid('clearSelectedRows')
+            ,fn: function(){
+                $(this).datagrid('clearSelectedRow')
             }
         }]
-        ,onSelectRow: function() {
+        ,onClickRow: function() {
             var l = [],d = [];
             
             $(this.cells).slice(0,-1).each(function(k,v){
@@ -102,11 +96,11 @@
             l = d = null
         }
         ,mapper:[{
-            name: 'id',alias:'Código',css:{width:50,textAlign:'center'}
+            name: 'id',title:'Código',width:50,align:'center'
         },{
-            name: 'nome',alias:'Nome',css:{width:200,textAlign:'left'}
+            name: 'nome',title:'Nome',width:200,align:'left'
         },{
-            name: 'empresa',alias:'Empresa',css:{textAlign:'left'}
+            name: 'empresa',title:'Empresa',align:'left'
         }]
     })
     
