@@ -10,7 +10,7 @@
  *	 jquery.ui.widget.js
  *	 jquery.ui.button.js
  */
-(function($){
+;(function($){
 
 	$.widget('ui.datagrid',{
 		// plugin options
