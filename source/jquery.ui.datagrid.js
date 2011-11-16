@@ -10,14 +10,14 @@
  *	 jquery.ui.widget.js
  *	 jquery.ui.button.js
  */
-;(function($){
+(function($){
 
 	$.widget('ui.datagrid',{
 		// plugin options
 		options: {
 
-			// default 5
-			limit: 5
+			// default 20
+			limit: 20
 
 			// params
 			//  - name
@@ -59,6 +59,7 @@
 			// callback
 			,onClickRow: false
 			,onComplete: false
+			,onError: false
 
 			// json
 			,toolBarButtons:false
@@ -127,7 +128,7 @@
 						+'</thead>'
 					+'</table>'
 				+'</div>'
-				+'<div class="ui-datagrid-body">'
+				+'<div class="ui-widget-content ui-datagrid-body">'
 					+'<table class="ui-datagrid">'
 						+'<thead>'
 							+'<tr></tr>'
@@ -186,7 +187,7 @@
 				.removeClass('ui-state-hover ui-state-focus')
 				.button('disable');
 			
-			return this
+			return this;
 		}
 		,_createColumns: function() {
 
@@ -294,15 +295,15 @@
 					
 					// cell content
 					cell.innerHTML = $.isFunction(_td.render)
-						// se render é uma função
-						// parametro é o conteúdo da célula
+						// if options.render is a function
+						// param cell innerHTML
 						? _td.render(item[_td.name])
 
 						// use global function
 						: ($.isFunction(window[_td.globalFunction]))
 							? window[_td.globalFunction](item[_td.name])
 
-							// comportamento padrão
+							// default
 							// mapper.row.fieldName
 							: item[_td.name];
 				}
@@ -312,13 +313,14 @@
 				
 				// reset
 				j = 0;
-				row = cell = null
+				row = cell = null;
 			}
 			
 			row = cell = theadThs = null;
 			i = y = 0;
 		}
 		,_ajax: function() {
+			
 			var self = this;
 			
 			// ajax
@@ -335,21 +337,32 @@
 					self.options.jsonStore.params.offset = self._offset
 				}
 				
-				// disable button toolbar
+				// disable toolbar button
+				// before ajax request
 				if (self.options.pagination) {
 					self._disableToolButtons();
 				}
 				
+				// ajax
 				$.ajax({
 					type: self.options.ajaxMethod.toLowerCase()
 					,url: self.options.jsonStore.url.replace(/\?.*/,'')
 					,data: self.options.jsonStore.params
 					,dataType: 'json'
+					,context: self
 					,success: function(json) {
 
+						var self = this;
+
 						if (undefined != json.error) {
+
 							alert(json.error);
-							return;
+
+							if ( $.isFunction(self.options.onError) ) {
+								self.options.onError.call(self.element[0]);
+							}
+
+							return false;
 						}
 						
 						if (undefined === json.num_rows || json.num_rows == 0) {
@@ -362,11 +375,14 @@
 							var currentPage = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1)
 								,infoPages = currentPage+' de '+self._totalPages+' ('+json.num_rows+')';
 							
-							// ultimo td
+							// last cell
 							$.each($(self.uiDataGridTfoot[0].rows[0].cells).eq(-1).children(),function(){
 								if (/span/i.test(this.tagName)) {
+									// update info
 									this.innerHTML = infoPages
 								} else {
+
+									// enable buttons
 									(/data-grid-button-(first|prev)/.test(this.name))
 										? (self._offset > 0 && this.disabled && $(this).button('enable'))
 										: (self._totalPages > currentPage && this.disabled && $(this).button('enable'))
@@ -374,7 +390,10 @@
 							})
 						}
 						
-						self._createRows(json)
+						// create rows
+						self._createRows(json);
+
+						self = null;
 					}
 				})
 			} else {
@@ -388,7 +407,7 @@
 				self.resetOffset();
 				self.load()
 			} else {
-				if ($.isArray(self.options.toolBarButtons)) {
+				if ( $.isArray(self.options.toolBarButtons) ) {
 
 					// cell to append btns
 					var cell = self.uiDataGridTfoot[0].rows[0].cells[0];
@@ -396,17 +415,21 @@
 					// each button
 					$.each(self.options.toolBarButtons,function(i,b){
 
-						(function(){
+						(function(ui){
 
-							if ($.isFunction(b.fn)) {
+							if ( $.isFunction(b.fn) ) {
 
 								this.bind('click',function(){
-									b.fn.apply(self.element[0],arguments);
+									b.fn.apply(ui.element[0],arguments);
 									$(this).blur();
 								});
 							}
 							
-							this.button({icons:{primary:(undefined === b.icon) ? null : 'ui-icon-'+b.icon}});
+							this.button({
+								icons:{
+									primary: (undefined === b.icon) ? null : 'ui-icon-'+b.icon
+								}
+							});
 							
 							cell.appendChild(this[0]);
 							
@@ -425,7 +448,7 @@
 				// dimensions
 				var h = self.uiDataGridThead.outerHeight();
 				
-				// grid scorll width
+				// set margin
 				self.uiDataGridTheadBody
 					.parent()
 					.css('marginTop',-h);
@@ -437,74 +460,100 @@
 					self._createToolButtons()._disableToolButtons();
 					
 					// prev next event
-					$(self.uiDataGridTfoot[0].rows[0].cells).eq(-1).delegate('button','click',function(){
-						if (!this.disabled) {
-							self[this.name.replace(/data-grid-button-/,'')+'Page']();
-							self._selectedRows = [];
-							self.load()
+					$(self.uiDataGridTfoot[0].rows[0].cells).eq(-1).delegate('button','click',(function(self){
+						return function() {
+
+							if ( false === this.disabled ) {
+								var c = ['_',this.name.replace(/data-grid-button-/,''),'Page'];
+
+								// call private function
+								// _nextPage
+								// _prevPage
+								// _endPage
+								// _firstPage
+								self[c.join('')]();
+
+								// clear selectec row
+								self._selectedRows = [];
+
+								// load
+								self.load();
+
+								// clear
+								c = null;
+							}
+						
 						}
-					});
+					})(self));
 				}
 				
+				// resize
 				self.resize();
 
 				// load
 				(self.options.autoLoad && self.load());
 				
 				// onComplete callback
-				($.isFunction(self.options.onComplete) && self.options.onComplete.call(self.uiDataGridTbody[0]));
+				if ( $.isFunction(self.options.onComplete) ) {
+
+					(function(ui){
+						setTimeout(function(){
+							ui.options.onComplete.call(ui.element[0]);
+						})
+					})(self);
+					
+				}
 			}
+
+			self = null;
 			
 			return this
 		}
-		,nextPage: function() {
+		,_nextPage: function() {
 			this._offset += this.options.limit
 		}
-		,prevPage: function() {
+		,_prevPage: function() {
 			this._offset -= this.options.limit
 		}
-		,endPage: function() {
+		,_endPage: function() {
 			this._offset = (this._totalPages * this.options.limit) - this.options.limit
 		}
-		,firstPage: function() {
+		,_firstPage: function() {
 			this._offset = 0
 		}
 		,_tbodyEvents: function() {
 			
 			if ( $.isFunction(this.options.onClickRow) ) {
 
-				var t = this.uiDataGridTbody;
-
-				// set data-callback
-				$.data(t[0],'callback',this.options.onClickRow);
-
 				// delegate
-				t.undelegate().delegate('tr','click',function(e){
+				this.uiDataGridTbody.undelegate().delegate('tr','click',(function(ui) {
 
-					// tbody
-					var p = this.parentNode;
+					return function(event) {
 
-					// highlight
-					$(this).addClass('ui-state-highlight');
+						// highlight
+						$(this).addClass('ui-state-highlight');
 
-					// execute callback
-					// tbody escope
-					$.data(p,'callback').call(this);
+						// execute callback
+						// context ui.datagrid
+						// param row clicked
+						ui.options.onClickRow.call(ui,this);
 
-					// remove selected row
-					(function(self){
-						(self !== this[0] && this.removeClass('ui-state-highlight'));
-					}).call($.data(p,'rowselected'),this);
+						// remove selected row
+						(function(domTbody){
+							
+							// get clicked row
+							var rowSelected = $.data(domTbody,'rowselected');
 
-					// current selected row
-					$.data(p,'rowselected',$(this));
+							// this = clicked row
+							(event.currentTarget !== rowSelected[0] && rowSelected.removeClass('ui-state-highlight'));
 
-					// clear
-					p = null;
+							// set current row clicked
+							$.data(domTbody,'rowselected',$(event.currentTarget));
 
-				});
+						})(ui.uiDataGridTbody[0]);
+					}
 
-				t = null;
+				})(this));
 			}
 
 			return this;
@@ -514,7 +563,7 @@
 		}
 		,resize: function() {
 			// fit to parent
-			if (this.options.fit) {
+			if ( this.options.fit ) {
 				(function(self){
 					var h = self.uiDataGrid.outerHeight() - self.element.height();
 					this.style.height = $(this).height() - h +'px';
