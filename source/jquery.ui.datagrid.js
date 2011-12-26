@@ -297,15 +297,11 @@
 					cell.innerHTML = $.isFunction(_td.render)
 						// if options.render is a function
 						// param cell innerHTML
-						? _td.render(item[_td.name])
+						? _td.render.call(cell,item[_td.name])
 
-						// use global function
-						: ($.isFunction(window[_td.globalFunction]))
-							? window[_td.globalFunction](item[_td.name])
-
-							// default
-							// mapper.row.fieldName
-							: item[_td.name];
+						// default
+						// mapper.row.fieldName
+						: item[_td.name];
 				}
 				
 				row.appendChild(document.createElement('th'));
