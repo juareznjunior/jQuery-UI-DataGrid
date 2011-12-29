@@ -32,6 +32,17 @@
 <script>
 (function($){
     var $dgLocal = $('#data-grid-local')
+		,$dlg = $('<div />').css('padding','4px').appendTo(document.body)
+			.dialog({
+				modal: true
+				,title: 'Row data'
+				,width: 500
+				,resizable: false
+				,autoOpen: false
+				,close: function() {
+					$(this).children().tabs('destroy').remove()
+				}
+			});
     
     $dgLocal.datagrid({
         jsonStore: {
@@ -81,28 +92,18 @@
         ,onClickRow: function(row) {
             var l = [],d = [];
             
-            $(row.cells).slice(0,-1).each(function(k,v){
+            $(row.cells).each(function(k,v){
                 l[l.length] = '<li><a href="#d'+k+'">td '+k+'</a></li>';
                 d[d.length] = '<div id="d'+k+'" class="ui-state-active ui-corner-all" style="margin:3px;padding:3px">'+v.innerHTML+'</div>';
             })
             
-            $('<div />')
-				.css('padding','4px')
+            $dlg.css('padding','4px')
 				.html('<div><ul>'+l.join('')+'</ul>'+d.join('')+'</div>')
-				.appendTo(document.body)
 				.children()
 				.height(130)
 				.tabs()
 				.end()
-				.dialog({
-					modal: true
-					,title: 'Row data'
-					,width: 500
-					,resizable: false
-					,close: function() {
-						$(this).children().tabs('destroy').remove().end().dialog('destroy').remove()
-					}
-				})
+				.dialog('open');
             
             l = d = null
         }
