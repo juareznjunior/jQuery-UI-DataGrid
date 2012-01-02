@@ -3,10 +3,8 @@
 		.css('padding','4px')
 		.appendTo(document.body)
 		.dialog({
-			modal: true
-			,title: 'Row data'
+			title: 'Row data'
 			,width: 500
-			,resizable: false
 			,autoOpen: false
 			,close: function() {
 				$(this).children().tabs('destroy').remove()
