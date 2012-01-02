@@ -1,0 +1,71 @@
+// dialog
+	var $dlg = $('<div />')
+		.css('padding','4px')
+		.appendTo(document.body)
+		.dialog({
+			modal: true
+			,title: 'Row data'
+			,width: 500
+			,resizable: false
+			,autoOpen: false
+			,close: function() {
+				$(this).children().tabs('destroy').remove()
+			}
+		});
+		
+var dataGridJSON = {
+	jsonStore: {
+		data: {"rows":[
+			{"id":"1","nome":"Fulano de Tal","empresa":"Empresa 1"}
+			,{"id":"2","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"3","nome":"Beltrano da Silva","empresa":"Empresa do tal"}
+			,{"id":"4","nome":"Beltrano da Silva","empresa":"Empresa 123122"}
+			,{"id":"5","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"6","nome":"Beltrano da Silva","empresa":"Empresa 3312"}
+			,{"id":"7","nome":"Beltrano da Silva","empresa":"Empresa 312"}
+			,{"id":"8","nome":"Beltrano da Silva","empresa":"Empresa 3123122"}
+			,{"id":"9","nome":"Fulano de Tal","empresa":"Empresa 221"}
+			,{"id":"10","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"11","nome":"Beltrano da Silva","empresa":"Empresa 3123122"}
+			,{"id":"12","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"13","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"14","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"15","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"16","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"17","nome":"Fulano de Tal","empresa":"Empresa 2"}
+			,{"id":"18","nome":"Beltrano da Silva","empresa":"Empresa 1232"}
+			,{"id":"18","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"20","nome":"Fulano de Tal","empresa":"Empresa 2"}
+			,{"id":"21","nome":"Beltrano da Silva","empresa":"Empresa23 2"}
+			,{"id":"22","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"23","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
+		]}
+	}
+	,title: 'jQuery UI DataGrid'
+	,rowNumber:true
+	,onClickRow: function(row) {
+		var l = [],d = [];
+		
+		$(row.cells).each(function(k,v){
+			l[l.length] = '<li><a href="#d'+k+'">td '+k+'</a></li>';
+			d[d.length] = '<div id="d'+k+'" class="ui-state-active ui-corner-all" style="margin:3px;padding:3px">'+v.innerHTML+'</div>';
+		})
+		
+		$dlg.css('padding','4px')
+			.html('<div><ul>'+l.join('')+'</ul>'+d.join('')+'</div>')
+			.children()
+			.height(130)
+			.tabs()
+			.end()
+			.dialog('open');
+		
+		l = d = null
+	}
+	,mapper:[{
+		name: 'id',title:'Código',width:50,align:'center'
+	},{
+		name: 'nome',title:'Nome',width:200,align:'left'
+	},{
+		name: 'empresa',title:'Empresa',align:'left'
+	}]
+}
