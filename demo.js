@@ -45,7 +45,8 @@
 					});
 					
 					self.off('click').on('click',function(){
-						dg.dialog('open')
+						dg.dialog('open');
+						self.blur();
 					}).button('option','label','Show Dialog');
 					
 				} else {
