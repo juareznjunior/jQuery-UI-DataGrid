@@ -30,30 +30,31 @@
 		icons: {
 			primary: 'ui-icon-arrowrefresh-1-e'
 		}
-	}).on('click',function(self){
-	
-		injectJs($(this).data('source'),(function(self){
+	}).on('click.demo',function(){
+		
+		injectJs($(this).data('source'),(function(self,dg){
 			return function() {
-			
-				var dg = self.next().datagrid(dataGridJSON)
+				
+				dg.empty();
 				
 				if ('example7' === dg[0].id) {
 				
-					dg.dialog({
+					dg.datagrid(dataGridJSON).dialog({
 						width: 600
 						,title: ' Example 7 - Using jQuery UI Dialog'
 					});
 					
 					self.off('click').on('click',function(){
 						dg.dialog('open');
-						self.blur();
 					}).button('option','label','Show Dialog');
 					
 				} else {
 					self.button('destroy').remove();
+					dg.datagrid(dataGridJSON);
 				}
+				
 			}
-		}($(this))));
+		}($(this),$(this).next().text('Loading...'))));
 	});
 	
 	injectJs('datagrid.html',function(self){
