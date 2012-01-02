@@ -1,6 +1,6 @@
 (function($) {
 
-	$.extend($.ui.dialog.prototype,{
+	$.extend($.ui.dialog.prototype.options,{
 		resizable: false
 		,draggable: false
 		,modal: true
