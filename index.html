@@ -7,19 +7,26 @@
 <title>juareznjunior/jQuery-UI-DataGrid @ GitHub</title>
 <style type="text/css">
 body {
-	font: 11px Tahoma,Geneva,sans-serif;
     margin: 0;
     outline: medium none;
-    padding: 0;
+    padding: 0 !important;
+	border: 0  !important;
 }
 h1 {
-	border-bottom:1px solid
+	border-width: 0 0 1px 0 !important;
+	font-size: 1em !important;
 }
-#header { width: 900px;padding:10px 0; text-align:center;font-size: 3.2em;margin: 0  auto;}
+h1.ui-widget-content { background: none; }
+#header { width: 900px;padding:10px 0; text-align:center;margin: 10px auto 0 auto;}
 #container {
 	margin: 0 auto;
 	width: 900px;
 }
+
+.example .ui-button .ui-button-text {font-size: 0.7em!important}
+.example:last-child {margin-bottom:20px};
+
+.ui-widget {font-family: verdana, arial, sans-serif; font-size:1em !important}
 .ui-dialog .ui-dialog-title {font-weight:bold}
 .ui-dialog .ui-dialog-content .ui-widget-form {-moz-box-shadow:none;-webkit-box-shadow:none;box-shadow:none}
 .ui-dialog {border-width:0;-moz-box-shadow:0 2px 25px #000;-webkit-box-shadow:0 2px 25px #000;box-shadow:0 2px 25px #000}
@@ -48,41 +55,43 @@ tr.foo-bar-xyz td {
 .ui-dialog-content { padding: 1px 0 0 0 !important}
 </style>
 </head>
-<body>
+<body class="ui-widget ui-widget-content">
+<img src="imgs/parana-flag.png" style="position:fixed;right:14px" />
 <a href="https://github.com/juareznjunior/jQuery-UI-DataGrid"><img style="position: fixed; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
-<div id="header" class="ui-widget-header">jQuery-UI-DataGrid by @juareznjunior</div>
+<div id="header" class="ui-widget-header ui-corner-all">jQuery-UI-DataGrid by @juareznjunior</div>
 <div id="container">
 	<div class="example">
-		<h1>Example 1 - Basic Usage</h1><div id="example1"></div>
+		<h1 class="ui-widget ui-widget-content">Example 1 - Basic Usage</h1><div id="example1"></div>
 	</div>
 	<div class="example">
-		<h1>Example 2</h1>
+		<h1 class="ui-widget ui-widget-content">Example 2 - Title and row number</h1>
 		<button data-source="datagrid2.html">load</button><div id="example2"></div>
 	</div>
 	<div class="example">
-		<h1>Example 3</h1>
+		<h1 class="ui-widget ui-widget-content">Example 3 - External load data - Buttons config</h1>
 		<button data-source="datagrid3.html">load</button><div id="example3"></div>
 	</div>
 	<div class="example">
-		<h1>Example 4</h1>
+		<h1 class="ui-widget ui-widget-content">Example 4 - Row click - Open jquery.ui.tabs on jquery.ui.dialog - row cells content</h1>
 		<button data-source="datagrid4.html">load</button><div id="example4"></div>
 	</div>
 	<div class="example">
-		<h1>Example 5</h1>
+		<h1 class="ui-widget ui-widget-content">Example 5 - Using mapper.render callback - highlight cell and row</h1>
 		<button data-source="datagrid5.html">load</button><div id="example5"></div>
 	</div>
 	<div class="example">
-		<h1>Example 6</h1>
+		<h1 class="ui-widget ui-widget-content">Example 6 - Using mapper.render callback - create checkbox</h1>
 		<button data-source="datagrid6.html">load</button><div id="example6"></div>
 	</div>
 	<div class="example">
-		<h1>Example 7</h1>
+		<h1 class="ui-widget ui-widget-content">Example 7 - Using datagrid on jquery.ui.dialog</h1>
 		<button data-source="datagrid7.html">load</button><div id="example7"></div>
 	</div>
 </div>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
 <script type="text/javascript" src="minified/jquery.ui.datagrid.min.js"></script>
+<script type="text/javascript" src="http://jqueryui.com/themeroller/themeswitchertool/"></script>
 <script src="demo.js"></script>
 </body>
 </html>
