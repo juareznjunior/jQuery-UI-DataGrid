@@ -26,9 +26,27 @@ var dataGridJSON = {
 			,{"id":"23","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
 		]}
 	}             
-	,title: 'jQuery UI DataGrid - Using title and row number'
+	,title: 'jQuery UI DataGrid - Using title and row number - jquery.tablesorter Plugin'
 	,pagination: false
 	,rowNumber: true
+	,onComplete: function() {
+		var $dg = $(this)
+			,$body = $dg.datagrid('getTbody');
+			
+		// apply tablesorter
+		$body.parent().tablesorter();
+		
+		// thead delegate
+		$dg.datagrid('getThead').on('click','th',(function(theadRow){
+			
+			return function() {
+				$( theadRow.cells[this.cellIndex] ).trigger('click');
+			}
+			
+		}( $body.prev()[0].rows[0] ) ));
+		
+		$body = $dg = null;
+	}
 	,mapper:[{
 		name: 'id',title:'Código',width:50,align:'center'
 	},{
