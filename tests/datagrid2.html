@@ -40,10 +40,15 @@ var dataGridJSON = {
 		$dg.datagrid('getThead').on('click','th',(function(theadRow){
 			
 			return function() {
+				
+				if ( $(this).hasClass('ui-datagrid-cell-rownumber') ) {
+					return;
+				}
+				
 				$( theadRow.cells[this.cellIndex] ).trigger('click');
 			}
 			
-		}( $body.prev()[0].rows[0] ) ));
+		}( $body.prev()[0].rows[0] )));
 		
 		$body = $dg = null;
 	}
