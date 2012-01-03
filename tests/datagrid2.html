@@ -37,7 +37,7 @@ var dataGridJSON = {
 		$body.parent().tablesorter();
 		
 		// thead delegate
-		$dg.datagrid('getThead').on('click','th',(function(theadRow){
+		$dg.datagrid('getThead').on('click','th',(function(bodyTheadRow){
 			
 			return function() {
 				
@@ -45,7 +45,19 @@ var dataGridJSON = {
 					return;
 				}
 				
-				$( theadRow.cells[this.cellIndex] ).trigger('click');
+				var $this = $(this)
+					,$parent = $this.parent()
+					,$active = $.data($parent[0],'active');
+					
+				if (undefined !== $active && $active[0] !== this ) {
+					$active.removeClass('ui-state-highlight');
+				}
+				
+				$( bodyTheadRow.cells[this.cellIndex] ).trigger('click').each(function(){
+					$.data($parent[0],'active',$this.addClass('ui-state-highlight'));
+				});
+				
+				$this = $parent = $active;
 			}
 			
 		}( $body.prev()[0].rows[0] )));
