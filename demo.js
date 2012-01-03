@@ -44,7 +44,7 @@
 						,title: ' Example 7 - Using jQuery UI Dialog'
 					});
 					
-					self.off('click').on('click',function(){
+					self.off('click.demo').on('click.demo',function(){
 						dg.dialog('open');
 					}).button('option','label','Show Dialog');
 					
