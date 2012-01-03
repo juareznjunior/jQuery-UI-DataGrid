@@ -13,7 +13,7 @@
 	var injectJs = function( oldObj,callback) {
 		var script = document.createElement( 'script' );
 
-		script.src = 'tests/'+oldObj;
+		script.src = 'tests/'+oldObj+'?ts='+(new Date()).getTime();
 
 		script.onreadystatechange = script.onload = function () {
 
