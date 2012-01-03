@@ -36,9 +36,8 @@ var dataGridJSON = {
 		// apply tablesorter
 		$body.parent().tablesorter();
 		
-		if (console) {
-			console.log($dg.datagrid('getThead'))
-		}
+		
+		console.log($dg.datagrid('getThead'))
 		
 		// thead delegate
 		$dg.datagrid('getThead').on('click','th',(function(theadRow){
