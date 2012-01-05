@@ -104,7 +104,12 @@
 	
 	// load basic datagrid
 	injectJs('datagrid.html',function(){
-		return $('#datagrid').datagrid(dataGridJSON);
+		return $('#datagrid')
+			.datagrid($.extend({},dataGridJSON,{
+				onComplete: function(){
+					$('#container').removeClass('xhidden');
+				}
+			}));
 	});
 	
 	//
