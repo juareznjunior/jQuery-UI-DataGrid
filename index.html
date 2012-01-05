@@ -4,6 +4,8 @@
 <meta charset='utf-8'>
 <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery.ui.datagrid.css" rel="stylesheet" type="text/css" />
+<link href="css/jquery.syntax.core.css" rel="stylesheet" type="text/css" />
+<link href="css/jquery.syntax.layout.list.css" rel="stylesheet" type="text/css" />
 <title>juareznjunior/jQuery-UI-DataGrid @ GitHub</title>
 <style type="text/css">
 body {
@@ -23,13 +25,16 @@ h1.ui-widget-content { background: none; }
 	width: 900px;
 }
 
-.example .ui-button .ui-button-text {font-size: 0.7em!important}
+.ui-dialog-buttonset .ui-button .ui-button-text,.example .ui-button .ui-button-text {font-size: 0.7em!important}
+.example > button { margin-bottom: 10px}
 .example:last-child {margin-bottom:20px};
 
 .ui-widget {font-family: verdana, arial, sans-serif; font-size:1em !important}
 .ui-dialog .ui-dialog-title {font-weight:bold}
+.ui-dialog .ui-dialog-titlebar { padding: 0.2em 1em;}
 .ui-dialog .ui-dialog-content .ui-widget-form {-moz-box-shadow:none;-webkit-box-shadow:none;box-shadow:none}
 .ui-dialog {border-width:0;-moz-box-shadow:0 2px 25px #000;-webkit-box-shadow:0 2px 25px #000;box-shadow:0 2px 25px #000}
+.ui-dialog .ui-dialog-buttonpane { padding: 0; border:0}
 
 .ui-button-icon-only .ui-button-text, .ui-button-icons-only .ui-button-text { padding: .3em; text-indent: -9999999px; }
 .ui-button-text-icon-primary .ui-button-text, .ui-button-text-icons .ui-button-text { padding: 0.2em 1em 0.2em 2.1em }
@@ -52,10 +57,18 @@ input.ui-button { padding: .3em 1em}
 tr.foo-bar-xyz td {
 	background: yellow !important
 }
-.ui-dialog-content { padding: 1px 0 0 0 !important}
+.ui-dialog { position: fixed }
+.ui-dialog-content { padding: 1px 0 0 0 !important; overflow-x: hidden}
+
+.syntax-theme-base .syntax {
+    font-size: 11px;
+}
 
 #example2 thead th {
 	cursor:pointer
+}
+iframe {
+	display:none
 }
 </style>
 </head>
@@ -65,33 +78,34 @@ tr.foo-bar-xyz td {
 <div id="header" class="ui-widget-header ui-corner-all">jQuery-UI-DataGrid by @juareznjunior</div>
 <div id="container">
 	<div class="example">
-		<h1 class="ui-widget ui-widget-content">Example 1 - Basic Usage</h1><div id="example1"></div>
+		<h1 class="ui-widget ui-widget-content">Example 1 - Basic Usage</h1><div id="datagrid"></div>
 	</div>
 	<div class="example">
 		<h1 class="ui-widget ui-widget-content">Example 2 - Title and row number - Using jquery.tablesorter plugin</h1>
-		<button data-source="datagrid2.html">load</button><div id="example2"></div>
+		<button data-source="datagrid2.html">load</button><div id="datagrid2"></div>
 	</div>
 	<div class="example">
 		<h1 class="ui-widget ui-widget-content">Example 3 - External load data - Buttons config</h1>
-		<button data-source="datagrid3.html">load</button><div id="example3"></div>
+		<button data-source="datagrid3.html">load</button><div id="datagrid3"></div>
 	</div>
 	<div class="example">
 		<h1 class="ui-widget ui-widget-content">Example 4 - Row click - Open jquery.ui.tabs on jquery.ui.dialog - row cells content</h1>
-		<button data-source="datagrid4.html">load</button><div id="example4"></div>
+		<button data-source="datagrid4.html">load</button><div id="datagrid4"></div>
 	</div>
 	<div class="example">
 		<h1 class="ui-widget ui-widget-content">Example 5 - Using mapper.render callback - highlight cell and row</h1>
-		<button data-source="datagrid5.html">load</button><div id="example5"></div>
+		<button data-source="datagrid5.html">load</button><div id="datagrid5"></div>
 	</div>
 	<div class="example">
 		<h1 class="ui-widget ui-widget-content">Example 6 - Using mapper.render callback - create checkbox</h1>
-		<button data-source="datagrid6.html">load</button><div id="example6"></div>
+		<button data-source="datagrid6.html">load</button><div id="datagrid6"></div>
 	</div>
 	<div class="example">
 		<h1 class="ui-widget ui-widget-content">Example 7 - Using datagrid on jquery.ui.dialog</h1>
-		<button data-source="datagrid7.html">load</button><div id="example7"></div>
+		<button data-source="datagrid7.html">load</button><div id="datagrid7"></div>
 	</div>
 </div>
+<div id="dialog-source"></div>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
 <script src="jquery.tablesorter.min.js"></script>
