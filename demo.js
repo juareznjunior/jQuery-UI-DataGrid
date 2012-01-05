@@ -47,13 +47,16 @@
 			return;
 		}
 		
-		$dlgSource.dialog('option','title','#'+dg.id+' datagrid source');
+		$dlgSource
+			.text('Loading...')
+			.dialog('option','title','#'+dg.id+' datagrid source')
+			.dialog('open');
 		
 		$.get($.data(dg,'src'),function(data){
 			$dlgSource
 				.data('active',dg)
 				.html('<div class="syntax-container syntax-theme-base">'+data+'</div>')
-				.dialog('open');
+				
 		});
 	};
 
