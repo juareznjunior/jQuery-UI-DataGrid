@@ -1,4 +1,5 @@
 .ui-datagrid-container table {width:100%;border:0 !important;border-spacing:0}
+.ui-datagrid-container .ui-datagrid-tools .ui-button[disabled] { border-color: transparent}
 .ui-datagrid-container caption.ui-state-default {padding:0}
 .ui-datagrid-container caption .ui-widget-header {padding:4px;border:0;}
 .ui-datagrid-container th,.ui-datagrid-container td {margin:0;padding:0;border-width: 0 1px 0 0 !important;}
