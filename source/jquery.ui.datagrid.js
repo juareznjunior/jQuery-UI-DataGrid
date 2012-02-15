@@ -353,10 +353,10 @@
 
 						if (undefined != json.error) {
 
-							alert(json.error);
-
 							if ( $.isFunction(self.options.onError) ) {
 								self.options.onError.call(self.element[0]);
+							} else {
+								alert(json.error);
 							}
 
 							return false;
@@ -434,6 +434,11 @@
 					});
 
 					cell = null;
+				}
+				
+				// render container
+				if ( self.element.css('display') === 'none' ) {
+					self.element.show();
 				}
 				
 				// create ui-datagrid
