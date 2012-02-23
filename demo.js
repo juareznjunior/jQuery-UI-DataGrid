@@ -88,7 +88,7 @@
 					
 					self.off('click.demo').on('click.demo',function(){
 						dg.dialog('open');
-					}).button('option','label','Show Dialog');
+					}).button('option','label','Show Dialog').button('enable');
 					
 				} else {
 					
@@ -99,7 +99,7 @@
 				
 				return dg;
 			}
-		}($(this),$(this).next().text('Loading...'))));
+		}($(this).button('disable'),$(this).next().text('Loading...'))));
 	});
 	
 	// load basic datagrid
