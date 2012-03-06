@@ -118,7 +118,11 @@
 			(this.options.autoRender && this.render());
 		}
 		,_setOption: function(option,value) {
-			$.Widget.prototype._setOption.apply(this,arguments);
+			if ( 'jsonStore' === option && $.isPlainObject(value) ) {
+				this.options.jsonStore = $.extend({},this.options.jsonStore,value);
+			} else {
+				$.Widget.prototype._setOption.apply(this,arguments);
+			}
 		}
 		,_getTemplate: function() {
 			return '<div class="ui-datagrid-container ui-widget ui-widget-content ui-corner-all">'
@@ -160,7 +164,7 @@
 				+'</div>'
 			+'</div>';
 		}
-		,_createToolButtons: function() {
+		,_createPageButtons: function() {
 		
 			var td = $(this.uiDataGridTfoot[0].rows[0].cells).eq(-1)[0];
 
@@ -180,7 +184,7 @@
 			
 			return this;
 		}
-		,_disableToolButtons: function() {
+		,_disablePageButtons: function() {
 			$(this.uiDataGridTfoot[0].rows[0].cells).eq(-1)
 				.children(':button')
 				.removeClass('ui-state-hover ui-state-focus')
@@ -268,12 +272,13 @@
 				,oTbody = self.uiDataGridTbody.empty()[0]
 				,row
 				,cell
-				,cls = 'ui-widget ui-widget-content';
+				,cls = 'ui-widget ui-widget-content'
+				,offset = self._offset + 1;;
 		
 			// reset scroll
 			self.uiDataGridScroll.scrollTop(0);
 			
-			$.map(json.rows,function(obj,i){
+			$.map( json.rows || json ,function(obj,i){
 			
 				// tr
 				row = oTbody.insertRow(-1);
@@ -283,7 +288,7 @@
 				if ( self.options.rowNumber ) {
 					cell = row.insertCell(0);
 					cell.className = 'ui-state-default ui-datagrid-cell-rownumber';
-					cell.innerHTML = '<div>'+(parseInt(self._offset > 0 || 1) + i)+'</div>';
+					cell.innerHTML = '<div>'+(offset+i)+'</div>';
 				}
 				
 				// tds
@@ -305,88 +310,85 @@
 			theadThs = oTbody = row = cell = self = null;
 		}
 		,_ajax: function() {
+
+			var url = this.options.jsonStore.url;
+			
+			if ( undefined === url || '' === url ) {
+				this._createRows(this.options.jsonStore.data);
+				return;
+			}
+			
+			// serialize
+			// literal object (isPlainObject (json))
+			if ('string' === typeof this.options.jsonStore.params) {
+				this.options.jsonStore.params = (0 === this._offset)
+					? this.options.jsonStore.params+'&limit='+this.options.limit+'&offset='+v._offset
+					: this.options.jsonStore.params.replace(/(&offset=)(.+)/,'&offset='+this._offset)
+			} else {
+			
+				// ex: obj.datagrid('option','jsonStore',{url:'foo/bar'})
+				if ( undefined === this.options.jsonStore.params ) {
+					this.options.jsonStore.params = {};
+				}
+				this.options.jsonStore.params.limit = this.options.limit;
+				this.options.jsonStore.params.offset = this._offset
+			}
+			
+			// disable toolbar button
+			// before ajax request
+			if (this.options.pagination) {
+				this._disablePageButtons();
+			}
 			
 			// ajax
-			if (this.options.jsonStore.url != '') {
-			
-				// serialize
-				// literal object (isPlainObject (json))
-				if ('string' === typeof this.options.jsonStore.params) {
-					this.options.jsonStore.params = (0 === this._offset)
-						? this.options.jsonStore.params+'&limit='+this.options.limit+'&offset='+v._offset
-						: this.options.jsonStore.params.replace(/(&offset=)(.+)/,'&offset='+this._offset)
-				} else {
-				
-					// ex: obj.datagrid('option','jsonStore',{url:'foo/bar'})
-					if ( undefined === this.options.jsonStore.params ) {
-						this.options.jsonStore.params = {};
+			$.ajax({
+				type: this.options.ajaxMethod.toLowerCase()
+				,url: this.options.jsonStore.url.replace(/\?.*/,'')
+				,data: this.options.jsonStore.params
+				,dataType: 'json'
+				,context: this
+				,success: function(json) {
+
+					var self = this,num_rows = json.num_rows || json[0].num_rows;
+
+					if (undefined != json.error) {
+
+						if ( $.isFunction(self.options.onError) ) {
+							self.options.onError.call(self.element[0]);
+						} else {
+							alert(json.error);
+						}
+
+						return false;
 					}
-					this.options.jsonStore.params.limit = this.options.limit;
-					this.options.jsonStore.params.offset = this._offset
-				}
-				
-				// disable toolbar button
-				// before ajax request
-				if (this.options.pagination) {
-					this._disableToolButtons();
-				}
-				
-				// ajax
-				$.ajax({
-					type: this.options.ajaxMethod.toLowerCase()
-					,url: this.options.jsonStore.url.replace(/\?.*/,'')
-					,data: this.options.jsonStore.params
-					,dataType: 'json'
-					,context: this
-					,success: function(json) {
-
-						var self = this;
-
-						if (undefined != json.error) {
-
-							if ( $.isFunction(self.options.onError) ) {
-								self.options.onError.call(self.element[0]);
+					
+					if ( self.options.pagination && undefined !== num_rows ) {
+					
+						self._totalPages = Math.ceil(num_rows / self.options.limit);
+						var currentPage = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1)
+							,infoPages = currentPage+' de '+self._totalPages+' ('+num_rows+')';
+						
+						// last cell
+						$.each($(self.uiDataGridTfoot[0].rows[0].cells).eq(-1).children(),function(){
+							if (/span/i.test(this.tagName)) {
+								// update info
+								this.innerHTML = infoPages
 							} else {
-								alert(json.error);
+
+								// enable buttons
+								(/data-grid-button-(first|prev)/.test(this.name))
+									? (self._offset > 0 && this.disabled && $(this).button('enable'))
+									: (self._totalPages > currentPage && this.disabled && $(this).button('enable'))
 							}
-
-							return false;
-						}
-						
-						if (undefined === json.num_rows || json.num_rows == 0) {
-							return false;
-						}
-						
-						if (self.options.pagination) {
-						
-							self._totalPages = Math.ceil(json.num_rows / self.options.limit);
-							var currentPage = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1)
-								,infoPages = currentPage+' de '+self._totalPages+' ('+json.num_rows+')';
-							
-							// last cell
-							$.each($(self.uiDataGridTfoot[0].rows[0].cells).eq(-1).children(),function(){
-								if (/span/i.test(this.tagName)) {
-									// update info
-									this.innerHTML = infoPages
-								} else {
-
-									// enable buttons
-									(/data-grid-button-(first|prev)/.test(this.name))
-										? (self._offset > 0 && this.disabled && $(this).button('enable'))
-										: (self._totalPages > currentPage && this.disabled && $(this).button('enable'))
-								}
-							})
-						}
-						
-						// create rows
-						self._createRows(json);
-
-						self = null;
+						})
 					}
-				})
-			} else {
-				this._createRows(this.options.jsonStore.data)
-			}
+					
+					// create rows
+					self._createRows(json);
+
+					self = null;
+				}
+			});
 		}
 		,render: function() {
 			var self = this;
@@ -450,7 +452,7 @@
 				if (self.options.pagination) {
 				
 					// create and disable buttons 
-					self._createToolButtons()._disableToolButtons();
+					self._createPageButtons()._disablePageButtons();
 					
 					// prev next event
 					$(self.uiDataGridTfoot[0].rows[0].cells).eq(-1).on('click','button',(function(self){
