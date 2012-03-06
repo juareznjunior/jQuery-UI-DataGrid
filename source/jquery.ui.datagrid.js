@@ -10,9 +10,9 @@
  *	 jquery.ui.widget.js
  *	 jquery.ui.button.js
  */
-;(function($,window,document,undefined){
+;(function($,window,document,undefined) {
 
-	$.widget('ui.datagrid',{
+	$.widget('ui.datagrid', {
 
 		// plugin options
 		options: {
@@ -29,16 +29,16 @@
 			,mapper: []
 
 			// data grid body height
-			,height:200
+			,height: 200
 
 			// params
 			//  - request params
 			//  - url ajax
 			//  - data local JSON
-			,jsonStore:{
+			,jsonStore: {
 				params: {}
 				,url: ''
-				,data:{}
+				,data: {}
 			}
 
 			// boolean
@@ -311,45 +311,55 @@
 		}
 		,_ajax: function() {
 
-			var url = this.options.jsonStore.url;
+			var o = this.options
+				,url = o.jsonStore.url
+				,limit = o.limit
+				,offset = this._offset
+				,store = o.jsonStore;
 			
 			if ( undefined === url || '' === url ) {
-				this._createRows(this.options.jsonStore.data);
+				this._createRows(store.data);
 				return;
 			}
 			
 			// serialize
 			// literal object (isPlainObject (json))
-			if ('string' === typeof this.options.jsonStore.params) {
-				this.options.jsonStore.params = (0 === this._offset)
-					? this.options.jsonStore.params+'&limit='+this.options.limit+'&offset='+v._offset
-					: this.options.jsonStore.params.replace(/(&offset=)(.+)/,'&offset='+this._offset)
+			if ('string' === typeof store.params) {
+				store.params = (0 === offset)
+					? store.params+'&limit='+limit+'&offset='+offset
+					: store.params.replace(/(&offset=)(.+)/,'&offset='+offset)
 			} else {
 			
 				// ex: obj.datagrid('option','jsonStore',{url:'foo/bar'})
-				if ( undefined === this.options.jsonStore.params ) {
-					this.options.jsonStore.params = {};
+				if ( undefined === store.params ) {
+					store.params = {};
 				}
-				this.options.jsonStore.params.limit = this.options.limit;
-				this.options.jsonStore.params.offset = this._offset
+				
+				// normalize
+				store.params.limit = limit;
+				store.params.offset = offset;
 			}
 			
 			// disable toolbar button
 			// before ajax request
-			if (this.options.pagination) {
+			if (o.pagination) {
 				this._disablePageButtons();
 			}
 			
 			// ajax
 			$.ajax({
-				type: this.options.ajaxMethod.toLowerCase()
-				,url: this.options.jsonStore.url.replace(/\?.*/,'')
-				,data: this.options.jsonStore.params
+				type: o.ajaxMethod.toLowerCase()
+				,url: url.replace(/\?.*/,'')
+				,data: store.params
 				,dataType: 'json'
 				,context: this
 				,success: function(json) {
 
-					var self = this,num_rows = json.num_rows || json[0].num_rows;
+					var self = this
+						// json using num_rows
+						// {"num_rows": number}
+						// [{"num_rows":number,"foo":"bar","date":date}]
+						,num_rows = json.num_rows || json[0].num_rows;
 
 					if (undefined != json.error) {
 
