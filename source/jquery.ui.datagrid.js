@@ -296,14 +296,18 @@
 					cell = row.insertCell(-1);
 					cell.className = cls;
 					cell.style.cssText = 'text-align:'+theadThs[cell.cellIndex].style.textAlign;
-					cell.innerHTML = $.isFunction(td.render)
-						// if options.render is a function
-						// param cell innerHTML
-						? td.render.call(cell,obj[td.name])
+					$(cell).html(
+						$.isFunction(td.render)
+							// if options.render is a function
+							// @context cell
+							// @param content
+							// @param json row
+							? td.render.call(cell,obj[td.name],obj)
 
-						// default
-						// mapper.row.fieldName
-						: obj[td.name];
+							// default
+							// mapper.row.fieldName
+							: obj[td.name]
+					);
 				});
 			});
 			
