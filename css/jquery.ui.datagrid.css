@@ -9,7 +9,7 @@
 .ui-datagrid-header > table > thead > tr > th:last-child {width: 17px}
 .ui-datagrid-body {height:200px;overflow:scroll;overflow-x:hidden;border:0;}
 .ui-datagrid-body .ui-state-hover ,.ui-datagrid-body .ui-state-highlight {border:0}
-.ui-datagrid-body tr {cursor:pointer}
+.ui-datagrid-body tr.ui-state-hover {cursor:default !important}
 .ui-datagrid-body td {font-weight:normal;}
 .ui-datagrid-body tr:hover td.ui-widget-content, .ui-datagrid-body tr.ui-state-highlight td.ui-widget-content {background:none;color:inherit !important;}
 .ui-datagrid-body td .ui-button { border-width: 1px;padding:0}
