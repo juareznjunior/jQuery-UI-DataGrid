@@ -360,23 +360,27 @@
 				,success: function(json) {
 
 					var self = this
-						// json using num_rows
-						// {"num_rows": number}
-						// [{"num_rows":number,"foo":"bar","date":date}]
-						,num_rows = json.num_rows || json[0].num_rows;
+						,num_rows;
 
-					if (undefined != json.error) {
+					if ( undefined != json.error || 0 === json.length  ) {
 
 						if ( $.isFunction(self.options.onError) ) {
 							self.options.onError.call(self.element[0]);
 						} else {
-							alert(json.error);
+							alert((0=== json.length) ? 'Empty rows' : json.error);
 						}
 
 						return false;
 					}
 					
-					if ( self.options.pagination && undefined !== num_rows ) {
+					// 
+					// {"num_rows": number,rows:[{"num_rows":number,"foo":"bar","date":date}]}
+					// [{"num_rows":number,"foo":"bar","date":date}]
+					// [{"foo":"bar","date":date},{"foo":"bar","date":date},{"foo":"bar","date":date}]
+					// [] | {}
+					num_rows =  json.num_rows || json[0].num_rows;
+					
+					if ( self.options.pagination && num_rows ) {
 					
 						self._totalPages = Math.ceil(num_rows / self.options.limit);
 						var currentPage = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1)
