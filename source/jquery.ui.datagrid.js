@@ -269,7 +269,14 @@
 				,cls = 'ui-widget ui-widget-content'
 				,offset = self._offset + 1
 				,localPagination = ('local' === origin && self.options.pagination)
-				,num_rows = (localPagination) ? json.length : json.num_rows || json[0].num_rows;
+				// this not good!!!
+				,num_rows = ( undefined === json.num_rows )
+					? ( undefined === json.rows )
+						? json.length
+						: ( undefined === json.rows[0].num_rows )
+							? json.rows.length
+							: json.rows[0].num_rows
+					: json.length;
 
 			// correct JSON
 			json = json.rows || json;
