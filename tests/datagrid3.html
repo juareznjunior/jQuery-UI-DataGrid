@@ -35,7 +35,7 @@
     
     $dgLocal.datagrid({
         jsonStore: {
-            data: {"rows":[
+            data: [
                 {"id":"1","nome":"Fulano de Tal","empresa":"Empresa 1"}
                 ,{"id":"2","nome":"Beltrano da Silva","empresa":"Empresa 2"}
                 ,{"id":"3","nome":"Beltrano da Silva","empresa":"Empresa do tal"}
@@ -59,11 +59,16 @@
                 ,{"id":"21","nome":"Beltrano da Silva","empresa":"Empresa23 2"}
                 ,{"id":"22","nome":"Beltrano da Silva","empresa":"Empresa 2"}
                 ,{"id":"23","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
-            ]}
+                ,{"id":"24","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
+                ,{"id":"25","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
+                ,{"id":"26","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
+                ,{"id":"27","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
+            ]
         }
-        ,pagination: false
+        ,pagination: true
+        ,limit: 5
         ,autoLoad: false
-        ,title: 'jQuery UI DataGrid'
+        ,title: 'jQuery UI DataGrid - Local Pagination'
         ,rowNumber:true
         ,onClickRow: function() {}
         ,toolBarButtons:[{
