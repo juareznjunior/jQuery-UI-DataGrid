@@ -276,7 +276,7 @@
 						: ( undefined === json.rows[0].num_rows )
 							? json.rows.length
 							: json.rows[0].num_rows
-					: json.length;
+					: json.num_rows;
 
 			// correct JSON
 			json = json.rows || json;
@@ -375,8 +375,7 @@
 				,context: this
 				,success: function(json) {
 
-					var self = this
-						,num_rows;
+					var self = this;
 
 					if ( undefined != json.error || 0 === json.length  ) {
 
