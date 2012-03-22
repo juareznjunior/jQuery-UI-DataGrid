@@ -113,6 +113,11 @@
 
 			// set data-rowselected
 			$.data(this.uiDataGridTbody[0],'rowselected',$([]));
+
+			if ( true === this.options.pagination ) {
+				// create and disable buttons 
+				this._createPageButtons();
+			}
 			
 			// plugin params
 			this._offset = 0;
@@ -182,9 +187,49 @@
 					}
 				
 				}
-			})(self)).css('display','none');
+			})(self));
 
 			td = self = null;
+		}
+		,_managePagination: function(num_rows) {
+
+			var self = this,currentPage,infoPages;
+
+			// 
+			// using keys num_rows and rows
+			// {"num_rows": number,rows:[{"foo":"bar","date":date},{"foo":"bar","date":date}]}
+			//
+			// using num_rows mapper
+			// [{"num_rows":number,"foo":"bar","date":date}]
+			//
+			// disable pagination via request
+			// [{"foo":"bar","date":date},{"foo":"bar","date":date},{"foo":"bar","date":date}]
+			// [] | {}
+			//
+
+			if ( self.options.pagination && num_rows ) {
+
+				// setters
+				self._totalPages = Math.ceil(num_rows / self.options.limit);
+				currentPage = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1);
+				infoPages = currentPage+' de '+self._totalPages+' ('+num_rows+')';
+
+				this.uiDataGridTdPagination.td.style.visibility = 'visible';
+
+				$.each(this.uiDataGridTdPagination.childs,function(){
+					if (/span/i.test(this.tagName)) {
+						// update info
+						this.innerHTML = infoPages
+					} else {
+						// enable buttons
+						(/data-grid-button-(first|prev)/.test(this.name))
+							? (self._offset > 0 && this.disabled && $(this).button('enable'))
+							: (self._totalPages > currentPage && this.disabled && $(this).button('enable'))
+					}
+				});
+			}
+
+			self = null;
 		}
 		,_createColumns: function() {
 
@@ -272,7 +317,9 @@
 				// this not good!!!
 				,num_rows = ( undefined === json.num_rows )
 					? ( undefined === json.rows )
-						? json.length
+						? ( undefined === json[0].num_rows )
+							? json.length
+							: json[0].num_rows
 						: ( undefined === json.rows[0].num_rows )
 							? json.rows.length
 							: json.rows[0].num_rows
@@ -288,7 +335,7 @@
 			}
 
 			// manage paginantion
-			managePagination.call(self,num_rows);
+			self._managePagination(num_rows);
 		
 			// reset scroll
 			self.uiDataGridScroll.scrollTop(0);
@@ -375,28 +422,24 @@
 				,context: this
 				,success: function(json) {
 
-					var self = this;
-
 					if ( undefined != json.error || 0 === json.length  ) {
 
-						if ( $.isFunction(self.options.onError) ) {
-							self.options.onError.call(self.element[0]);
+						if ( $.isFunction(this.options.onError) ) {
+							this.options.onError.call(this.element[0]);
 						} else {
-							alert((0=== json.length) ? 'Empty rows' : json.error);
+							alert((0=== this.length) ? 'Empty rows' : this.error);
 						}
 
 						return false;
 					}
 					
 					// create rows
-					self._createRows(json,'ajax');
-
-					self = null;
+					this._createRows(json,'ajax');
 				}
 			});
 		}
 		,render: function() {
-			var self = this;
+			var self = this,cell,h;
 			
 			if ( self._active() ) {
 				self.resetOffset();
@@ -405,7 +448,7 @@
 				if ( $.isArray(self.options.toolBarButtons) ) {
 
 					// cell to append btns
-					var cell = self.uiDataGridTfoot[0].rows[0].cells[0];
+					cell = self.uiDataGridTfoot[0].rows[0].cells[0];
 
 					// each button
 					$.map(self.options.toolBarButtons,function(b,i){
@@ -446,18 +489,13 @@
 				self._createColumns();
 				
 				// dimensions
-				var h = self.uiDataGridThead.outerHeight();
+				h = self.uiDataGridThead.outerHeight();
 				
 				// set margin
 				self.uiDataGridTheadBody
 					.parent()
 					.css('marginTop',-h);
 				h = null;
-				
-				if ( self.options.pagination ) {
-					// create and disable buttons 
-					self._createPageButtons();
-				}
 				
 				// resize
 				self.resize();
@@ -627,49 +665,11 @@
 					+'<tbody>'
 						+'<tr>'
 							+'<td>&nbsp;</td>'
-							+'<td><span></span></td>'
+							+'<td style="visibility:hidden"><span></span></td>'
 						+'</tr>'
 					+'</tbody>'
 				+'</table>'
 			+'</div>'
 		+'</div>';
-	}
-	,managePagination = function(num_rows) {
-
-		var self = this,currentPage,infoPages;
-
-		// 
-		// using keys num_rows and rows
-		// {"num_rows": number,rows:[{"foo":"bar","date":date},{"foo":"bar","date":date}]}
-		//
-		// using num_rows mapper
-		// [{"num_rows":number,"foo":"bar","date":date}]
-		//
-		// disable pagination via request
-		// [{"foo":"bar","date":date},{"foo":"bar","date":date},{"foo":"bar","date":date}]
-		// [] | {}
-		//
-
-		if ( self.options.pagination && num_rows ) {
-
-			// setters
-			self._totalPages = Math.ceil(num_rows / self.options.limit);
-			currentPage = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1);
-			infoPages = currentPage+' de '+self._totalPages+' ('+num_rows+')';
-
-			this.uiDataGridTdPagination.td.style.display = 'table-cell';
-
-			$.each(this.uiDataGridTdPagination.childs,function(){
-				if (/span/i.test(this.tagName)) {
-					// update info
-					this.innerHTML = infoPages
-				} else {
-					// enable buttons
-					(/data-grid-button-(first|prev)/.test(this.name))
-						? (self._offset > 0 && this.disabled && $(this).button('enable'))
-						: (self._totalPages > currentPage && this.disabled && $(this).button('enable'))
-				}
-			});
-		}
 	};
 }(jQuery,window,document));
