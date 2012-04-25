@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<head>
+<title>:: jQueryUI datagrid ::</title>
+<meta http-equiv="content-type" content="text/html; charset=utf8" /> 
+<meta http-equiv="content-language" content="pt-br" />
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css" />
+<link href="../css/jquery.ui.datagrid.css" rel="stylesheet" type="text/css" />
+<style>
+.ui-widget { font-size:12px;}
+#data-grid-local {
+    width:100%;
+    background:#b0f1b0;
+    height:100%;
+    position: static;
+    bottom: 0; 
+}
+
+
+.ui-corner-bottom {
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+.ui-corner-right {
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+.ui-corner-left { 
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+.ui-corner-all {
+    border-radius: 2px;
+}
+</style>
+</head>
+<body>
+<div id="data-grid-local"></div>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+<script type="text/javascript" src="../minified/jquery.ui.datagrid.min.js"></script>
+<script>
+(function($){
+    var $dgLocal = $('#data-grid-local')
+    
+    $dgLocal.datagrid({
+        jsonStore: {
+            data: [{"id":1,"placa":"N0188","motorista":"37FFEDB9D0","carga":null,"destino":null,"ignicao":"Desligado","velocidade":"0","endereco":"R. das Laranjeiras, 962-1202 - Sinop - MT, 78550-000, Brasil","panico":null,"area":null,"area_situacao":null},{"id":null,"placa":"N0155","motorista":"0000000000","carga":null,"destino":null,"ignicao":"Desligado","velocidade":"0","endereco":"Av. das Sibipirunas, 2328-2638 - Distrito Industrial, Sinop - MT, 78550-000, Brasil","panico":null,"area":null,"area_situacao":null},{"id":null,"placa":"N0158","motorista":"0000000000","carga":null,"destino":null,"ignicao":"Ligado","velocidade":"0","endereco":"Av. das Sibipirunas, 2328-2638 - Distrito Industrial, Sinop - MT, 78550-000, Brasil","panico":null,"area":null,"area_situacao":null},{"id":null,"placa":"NNNN0167","motorista":"0000000000","carga":null,"destino":null,"ignicao":"Ligado","velocidade":"0","endereco":"Av. das Sibipirunas, 2328-2638 - Distrito Industrial, Sinop - MT, 78550-000, Brasil","panico":null,"area":null,"area_situacao":null}]
+        }             
+        ,title: 'jQuery UI DataGrid'
+        ,pagination: false
+        ,rowNumber: true
+,onClickRow: function() {}
+
+        
+
+        ,mapper:[{
+
+            name: 'placa',title:'Placa',width:120,align:'left'
+
+        },{
+
+            name: 'motorista',title:'Motorista',width:200,align:'left'
+
+        },{
+
+            name: 'carga',title:'Carga',width:200,align:'left'
+
+        },{
+
+            name: 'destino',title:'Destino',width:300,align:'left'
+
+        },{
+
+            name: 'ignicao',title:'Ignição',width:100,align:'left'
+
+        },{
+
+            name: 'velocidade',title:'Velocidade',width:100,align:'left'    
+
+        },{
+
+            name: 'endereco',title:'Endereço',width:300,align:'left'    
+
+        },{
+
+            name: 'panico',title:'Pânico',width:100,align:'left'    
+
+        },{
+
+            name: 'area',title:'Área',width:300,align:'left'
+
+        },{
+
+            name: 'area_situacao',title:'Situação',width:100,align:'left'   
+
+        }]
+
+    })
+    
+})(jQuery)
+</script>
+</body> 
+</html>
