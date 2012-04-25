@@ -10,6 +10,18 @@
  *	 jquery.ui.widget.js
  *	 jquery.ui.button.js
  */
+/*!
+ * jQuery UI datagrid
+ * 
+ * @autor:.....Juarez Gonçalves Nery Junior
+ * @email:.....juareznjunior@gmail.com
+ * @twitter:...@juareznjunior
+ * 
+ * Depends:
+ *	 jquery.ui.core.js
+ *	 jquery.ui.widget.js
+ *	 jquery.ui.button.js
+ */
 ;(function($,window,document,undefined) {
 
 	$.widget('ui.datagrid', {
@@ -67,7 +79,7 @@
 		,_create: function() {
 		
 			// helper
-			var uiDataGridTables = [],caption;
+			var uiDataGridTables = [],contentScroll;
 			
 			// container datagrid
 			this.uiDataGrid = $(getTemplateDataGrid());
@@ -77,15 +89,15 @@
 				if ( $(this).hasClass('ui-datagrid') ) {
 					uiDataGridTables.push(this);
 				} else {
-					caption = this.createCaption();
+					contentScroll = this.parentNode.parentNode;
 				}
 			});
 
-			// grid caption
+			// grid title
 			if ( this.options.title === '' ) {
-				caption.parentNode.deleteCaption();
+				$(contentScroll.parentNode).prev().remove();
 			} else {
-				$(caption).children().text(this.options.title)
+				$(contentScroll.parentNode).prev().children().text(this.options.title)
 			}
 
 			// remove tfoot if...
@@ -94,12 +106,14 @@
 			}
 
 			// setters
-			this.uiDataGridThead     = $(uiDataGridTables[0].tHead);
-			this.uiDataGridColGroup  = this.uiDataGridThead.prev();
-			this.uiDataGridTheadBody = $(uiDataGridTables[1].tHead);
-			this.uiDataGridTbody     = $(uiDataGridTables[1].tBodies[0]);
-			this.uiDataGridTfoot     = (this.options.pagination || $.isArray(this.options.toolBarButtons)) ? $(uiDataGridTables[2].tBodies[0]) : $([]);
-			this.uiDataGridScroll    = $(uiDataGridTables[1].parentNode).height(this.options.height);
+			this.uiDataGridThead      = $(uiDataGridTables[0].tHead);
+			this.uiDataGridTheadBody  = $(uiDataGridTables[1].tHead);
+			this.uiDataGridColGroup1  = this.uiDataGridThead.prev();
+			this.uiDataGridColGroup2  = this.uiDataGridTheadBody.prev();
+			this.uiDataGridTbody      = $(uiDataGridTables[1].tBodies[0]);
+			this.uiDataGridTfoot      = (this.options.pagination || $.isArray(this.options.toolBarButtons)) ? $(uiDataGridTables[2].tBodies[0]) : $([]);
+			this.uiDataGridScrollBody = $(uiDataGridTables[1].parentNode).height(this.options.height);
+			this.uiDataGridScrollMain = $(contentScroll);
 
 			// pagination td cache
 			// initial config
@@ -109,7 +123,7 @@
 			};
 
 			// clear
-			uiDataGridTables = caption = null
+			uiDataGridTables = contentScroll = null;
 
 			// set data-rowselected
 			$.data(this.uiDataGridTbody[0],'rowselected',$([]));
@@ -127,7 +141,9 @@
 			this._tbodyEvents();
 		}
 		,_init: function() {
-			(this.options.autoRender && this.render());
+			if (this.options.autoRender) {
+				this.render();
+			}
 		}
 		,_setOption: function(option,value) {
 			if ( 'jsonStore' === option && $.isPlainObject(value) ) {
@@ -234,32 +250,28 @@
 		,_createColumns: function() {
 
 			var self = this
-				,cls = 'ui-widget ui-state-default'
 				,auxTh
-				,row = [];
+				,row = []
+				,helper = '<div class="ui-widget ui-state-default" style="overflow:scroll;position:absolute;left:0"></div>'
+				,col = '<col></col>'
+				,cols = []
+				,th = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
+				,text
+				,w = 0
+				,sw = 0;
 			
 			// each mapper
 			$.map(self.options.mapper,function(obj,index){
 			
-				auxTh = document.createElement('th');
-				auxTh.className = cls;
-				
-				var html = obj.title || obj.name
-					,helper = document.createElement('div')
-					,col = document.createElement('col')
-					,w = 10;
-					
-				auxTh.innerHTML = html;
-					
-				helper.className = 'ui-widget ui-state-default';
-				helper.style.cssText = 'overflow:scroll;position:absolute;left:0';
-				helper.innerHTML = html;
-				
-				document.body.appendChild(helper);
+				text = obj.title || obj.name;
+				w = 10;
+
+				// th
+				auxTh = $(th).text(text);
 				
 				// align
 				if ( /left|right|center/.test(obj.align) ) {
-					auxTh.style.textAlign = obj.align;
+					auxTh[0].style.textAlign = obj.align;
 				}
 
 				// width
@@ -267,42 +279,41 @@
 					w = obj.width;
 				}
 				
-				// ajuste do width
-				w = (Math.max(w,helper.scrollWidth));
-				
-				// cel into colgroup
-				col.style.width = w+'px';
-				self.uiDataGridColGroup[0].appendChild(col);
+				// ajuste do width - using div helper
+				(function(div){
+					w = (Math.max(w,div.innerWidth()));
+					return div;
+				}( $(helper).text(text).appendTo(document.body) )).remove();
 				
 				// append
-				row[row.length] = auxTh;
-				
-				// remove helper
-				document.body.removeChild(helper);
-				helper = col = w = null;
+				cols[cols.length] = $(col).width(w)[0];
+				row[row.length] = auxTh[0];
+
+				sw += w;
 			});
-			
-			// last cell width auto
-			self.uiDataGridColGroup.children().eq(-1)[0].style.width = 'auto';
-			
+
+			// enable row number
 			if (self.options.rowNumber) {
-				auxTh = document.createElement('th');
-				auxTh.className = 'ui-state-default ui-datagrid-cell-rownumber';
-				auxTh.innerHTML = '<div></div>';
-
-				// cel into colgroup
-				$(document.createElement('col'))
-					.width(20)
-					.prependTo(self.uiDataGridColGroup[0]);
-
-				row.splice(0,0,auxTh)
+				cols.splice(0,0,$(col).width(20)[0]);
+				row.splice(0,0,$('<th class="ui-state-default ui-datagrid-cell-rownumber" role="columnheader"><div></div></th>')[0])
+				sw += 20;
 			}
 
-			self.uiDataGridColGroup.clone().insertBefore(self.uiDataGridTheadBody[0]);
-			
+			// enable overflow-y
+			if ( sw > self.element.width() ) {
+				self.uiDataGridScrollMain.width(sw)
+			}
+
+			// last col
+			$(cols).last().width('auto');
+
+			// create colgroup cols
+			$([self.uiDataGridColGroup1[0],self.uiDataGridColGroup2[0]]).append(cols);
+
+			// create thead ths
 			$([self.uiDataGridThead[0].rows[0],self.uiDataGridTheadBody[0].rows[0]]).append(row);
 			
-			row = auxTh = self = null;
+			row = auxTh = self = col = cols = helper = th = null;
 		}
 		,_createRows: function(json,origin) {
 		
@@ -338,7 +349,7 @@
 			self._managePagination(num_rows);
 		
 			// reset scroll
-			self.uiDataGridScroll.scrollTop(0);
+			self.uiDataGridScrollBody.scrollTop(0);
 			
 			// use each
 			$.each( json ,function(i,obj){
@@ -517,19 +528,19 @@
 
 			self = null;
 			
-			return this
+			return this;
 		}
 		,_nextPage: function() {
-			this._offset += this.options.limit
+			this._offset += this.options.limit;
 		}
 		,_prevPage: function() {
-			this._offset -= this.options.limit
+			this._offset -= this.options.limit;
 		}
 		,_endPage: function() {
-			this._offset = (this._totalPages * this.options.limit) - this.options.limit
+			this._offset = (this._totalPages * this.options.limit) - this.options.limit;
 		}
 		,_firstPage: function() {
-			this._offset = 0
+			this._offset = 0;
 		}
 		,_tbodyEvents: function() {
 			
@@ -572,7 +583,12 @@
 			return this;
 		}
 		,_active: function() {
-			return this.element.children(':eq(0)').hasClass('ui-datagrid-container')
+			return this.element.children(':eq(0)').hasClass('ui-datagrid-container');
+		}
+		,_getBHF: function(bfh,callback) {
+			return ($.isFunction(callback))
+				? callback.call(bfh[0])
+				: bfh;
 		}
 		,resize: function() {
 			// fit to parent
@@ -580,7 +596,7 @@
 				(function(self){
 					var h = self.uiDataGrid.outerHeight() - self.element.height();
 					this.style.height = $(this).height() - h +'px';
-				}).call(this.uiDataGridScroll[0],this);
+				}).call(this.uiDataGridScrollBody[0],this);
 			}
 			
 			return this;
@@ -601,32 +617,26 @@
 			return this;
 		}
 		,widget: function() {
-			return this.uiDataGrid
+			return this.uiDataGrid;
 		}
 		,destroy: function() {
 			$.Widget.prototype.destroy.call(this);
-			this.element.empty()
+			this.element.empty();
 		}
 		,getOffset: function() {
-			return this._offset
+			return this._offset;
 		}
 		,resetOffset: function() {
-			this._offset = 0
+			this._offset = 0;
 		}
 		,getThead: function(callback) {
-			return ($.isFunction(callback))
-				? callback.call(this.uiDataGridThead[0])
-				: this.uiDataGridThead
+			return this._getBHF(this.uiDataGridThead,callback);
 		}
 		,getTbody: function(callback) {
-			return ($.isFunction(callback))
-				? callback.call(this.uiDataGridTbody[0])
-				: this.uiDataGridTbody
+			return this._getBHF(this.uiDataGridTbody,callback);
 		}
 		,getTFoot: function(callback) {
-			return ($.isFunction(callback))
-				? callback.call(this.uiDataGridTfoot[0])
-				: this.uiDataGridTfoot
+			return this._getBHF(this.uiDataGridTfoot,callback);
 		}
 	});
 
@@ -634,31 +644,36 @@
 
 	var getTemplateDataGrid = function() {
 		return '<div class="ui-datagrid-container ui-widget ui-widget-content ui-corner-all">'
-			+'<div class="ui-datagrid-header ui-state-default">'
-				+'<table>'
-					+'<caption class="ui-state-default"><div class="ui-widget-header"></div></caption>'
-					+'<thead>'
-						+'<tr>'
-							+'<th>'
-								+'<table class="ui-datagrid">'
-									+'<colgroup></colgroup>'
-									+'<thead>'
-										+'<tr></tr>'
-									+'</thead>'
-								+'</table>'
-							+'</th>'
-							+'<th></th>'
-						+'</tr>'
-					+'</thead>'
-				+'</table>'
-			+'</div>'
-			+'<div class="ui-widget-content ui-datagrid-body">'
-				+'<table class="ui-datagrid">'
-					+'<thead>'
-						+'<tr></tr>'
-					+'</thead>'
-					+'<tbody></tbody>'
-				+'</table>'
+			+'<div class="ui-state-default ui-datagrid-title"><div class="ui-widget-header"></div></div>'
+			+'<div class="ui-datagrid-content">'
+				+'<div class="ui-datagrid-content-scroll">'
+					+'<div class="ui-datagrid-header ui-state-default">'
+						+'<table>'
+							+'<thead>'
+								+'<tr>'
+									+'<th>'
+										+'<table class="ui-datagrid">'
+											+'<colgroup></colgroup>'
+											+'<thead>'
+												+'<tr role="rowheader"></tr>'
+											+'</thead>'
+										+'</table>'
+									+'</th>'
+									+'<th></th>'
+								+'</tr>'
+							+'</thead>'
+						+'</table>'
+					+'</div>'
+					+'<div class="ui-widget-content ui-datagrid-body">'
+						+'<table class="ui-datagrid">'
+							+'<colgroup></colgroup>'
+							+'<thead>'
+								+'<tr role="rowheader"></tr>'
+							+'</thead>'
+							+'<tbody></tbody>'
+						+'</table>'
+					+'</div>'
+				+'</div>'
 			+'</div>'
 			+'<div class="ui-widget ui-state-default ui-datagrid-tools">'
 				+'<table class="ui-datagrid">'
