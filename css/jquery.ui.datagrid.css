@@ -1,16 +1,16 @@
+.ui-datagrid-content {overflow: auto;overflow-y:hidden;margin:0;padding:0;}
+.ui-widget .ui-datagrid-title {border:0}
+.ui-datagrid-title .ui-widget-header {padding:4px;border:0;text-align:center;}
 .ui-datagrid-container table {width:100%;border:0 !important;border-spacing:0;border-collapse: separate}
 .ui-datagrid-container .ui-datagrid-tools .ui-button[disabled] { border-color: transparent}
-.ui-datagrid-container caption.ui-state-default {padding:0}
-.ui-datagrid-container caption .ui-widget-header {padding:4px;border:0;}
 .ui-datagrid-container th,.ui-datagrid-container td {margin:0;padding:0;border-width: 0 1px 0 0 !important;}
-.ui-datagrid-title {text-align:center;padding:2px;margin-bottom:1px}
 .ui-datagrid-header {border-width: 0  0  1px 0 !important;}
 .ui-datagrid-header .ui-state-default,.ui-datagrid-body .ui-state-default,.ui-datagrid-body .ui-widget-content {padding: 3px}
 .ui-datagrid-header > table > thead > tr > th:last-child {width: 17px}
 .ui-datagrid-body {height:200px;overflow:scroll;overflow-x:hidden;border:0;}
 .ui-datagrid-body .ui-state-hover ,.ui-datagrid-body .ui-state-highlight {border:0}
 .ui-datagrid-body tr.ui-state-hover {cursor:default !important}
-.ui-datagrid-body td {font-weight:normal;}
+.ui-datagrid-body td {font-weight:normal;overflow: hidden;}
 .ui-datagrid-body tr:hover td.ui-widget-content, .ui-datagrid-body tr.ui-state-highlight td.ui-widget-content {background:none;color:inherit !important;}
 .ui-datagrid-body td .ui-button { border-width: 1px;padding:0}
 .ui-datagrid-tools {border-width: 1px 0 0 0 !important;}
@@ -18,4 +18,4 @@
 .ui-datagrid-tools td:last-child {text-align:right}
 .ui-datagrid-tools td:last-child .ui-button-icon-only .ui-button-text ,.ui-datagrid-tools td:last-child .ui-button-icons-only .ui-button-text { padding:1px}
 .ui-datagrid-cell-rownumber {width:20px}
-.ui-datagrid-cell-rownumber div {text-align:center;width:20px;overflow:hidden}
+.ui-datagrid-cell-rownumber div {text-align:center;width:20px;overflow:hidden;white-space: nowrap;}
