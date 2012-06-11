@@ -10,18 +10,6 @@
  *	 jquery.ui.widget.js
  *	 jquery.ui.button.js
  */
-/*!
- * jQuery UI datagrid
- * 
- * @autor:.....Juarez Gonçalves Nery Junior
- * @email:.....juareznjunior@gmail.com
- * @twitter:...@juareznjunior
- * 
- * Depends:
- *	 jquery.ui.core.js
- *	 jquery.ui.widget.js
- *	 jquery.ui.button.js
- */
 ;(function($,window,document,undefined) {
 
 	$.widget('ui.datagrid', {
@@ -164,23 +152,21 @@
 
 			$.map(['first','prev','next','end'],function(n,b){
 
-				b = document.createElement('button');
-				b.name = 'data-grid-button-'+n;
-				b.innerHTML = n;
-
-				$(b).button({
+				b = $('<button>').attr('name','data-grid-button-'+n).text(n).button({
 					icons: { primary: 'ui-icon-seek-'+n}
 					,text: false
 					,disabled: true
 				}).appendTo(td);
 
 				// add dom button
-				self.uiDataGridTdPagination.childs.push(b);
+				self.uiDataGridTdPagination.childs.push(b[0]);
 			});
 
 			// prev next event
-			$(td).on('click','button',(function(self){
-				return function() {
+			$(td).on('click','button.ui-button',(function(self){
+				return function(event) {
+
+					event.preventDefault();
 
 					if ( false === this.disabled ) {
 						var c = ['_',this.name.replace(/data-grid-button-/,''),'Page'];
@@ -201,6 +187,8 @@
 						// clear
 						c = null;
 					}
+
+					return false;
 				
 				}
 			})(self));
@@ -468,9 +456,11 @@
 
 							if ( $.isFunction(b.fn) ) {
 
-								this.on('click',function(){
+								this.on('click',function(event){
+									event.preventDefault();
 									b.fn.apply(ui.element[0],arguments);
 									$(this).blur();
+									return false;
 								});
 							}
 							
@@ -482,7 +472,7 @@
 							
 							cell.appendChild(this[0]);
 							
-						}).call( $(document.createElement('button')).html(b.label),self);
+						}).call( $('<button>').text(b.label),self);
 					});
 
 					cell = null;
