@@ -507,11 +507,9 @@
 				// onComplete callback
 				if ( $.isFunction(self.options.onComplete) ) {
 
-					(function(ui){
-						setTimeout(function(){
-							ui.options.onComplete.call(ui.element[0]);
-						})
-					}(self));
+					setTimeout(function(ui){
+						ui.options.onComplete.call(ui.element[0]);
+					},1,self)
 					
 				}
 			}
@@ -547,7 +545,7 @@
 						// execute callback
 						// context ui.datagrid
 						// param row clicked
-						ui.options.onClickRow.call(ui,this);
+						ui.options.onClickRow.call(ui.element[0],this);
 
 						// remove selected row
 						(function(domTbody){
@@ -586,7 +584,7 @@
 				(function(self){
 					var h = self.uiDataGrid.outerHeight() - self.element.height();
 					this.style.height = $(this).height() - h +'px';
-				}).call(this.uiDataGridScrollBody[0],this);
+				}).call(this.uiDataGridScrollBody[0],this.element[0]);
 			}
 			
 			return this;
