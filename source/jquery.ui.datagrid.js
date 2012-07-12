@@ -510,9 +510,11 @@
 				// onComplete callback
 				if ( $.isFunction(self.options.onComplete) ) {
 
-					setTimeout(function(ui){
-						ui.options.onComplete.call(ui.element[0]);
-					},1,self)
+					setTimeout((function(ui){
+						return function(){
+							ui.options.onComplete.call(ui.element[0]);
+						}
+					}(self)),1);
 					
 				}
 			}
