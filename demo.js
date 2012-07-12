@@ -58,6 +58,41 @@
 				.html('<div class="syntax-container syntax-theme-base">'+data+'</div>')
 				
 		});
+	}
+
+	// create datagrid using jquery.ui.dialog and jquery.ui.tabs
+	// @arg jQuery button
+	// @arg jQuery div
+	,plugins = {
+		datagrid7: function(b,d) {
+			d.datagrid(dataGridJSON).dialog({
+				width: 600
+				,title: ' Example 7 - Using jQuery UI Dialog'
+				,autoOpen: true
+				,buttons: {
+					'View Source': function() {
+						viewSource(d[0]);
+					}
+				}
+			});
+
+			b.off('click.demo').on('click.demo',function(){
+				d.dialog('open');
+			}).button('option','label','Show Dialog').button('enable');
+		}
+		,datagrid8: function(b,d) {
+			d
+			.html('<ul><li><a href="#tabs-1">Grid 1</a></li><li><a href="#tabs-2">Grid 2</a></li><li><a href="#tabs-3">Grid 3</a></li></ul><div id="tabs-1"><p>Tab 1 content</p></div><div id="tabs-2"><p>Tab 2 content</p></div><div id="tabs-3"><p>Tab 3 content</p></div>')
+			.tabs({
+				show: function(event,ui) {
+					if ( undefined === $.data(ui.panel,'tabs-load') ) {
+						dataGridJSON.title = 'DataGrid '+ui.tab.innerHTML
+						$(ui.panel).empty().datagrid(dataGridJSON);
+						$.data(ui.panel,'tabs-load',true);
+					}
+				}
+			})
+		}
 	};
 
 	// jquery.ui.button
@@ -73,23 +108,8 @@
 				
 				dg.empty();
 				
-				if ('datagrid7' === dg[0].id) {
-				
-					dg.datagrid(dataGridJSON).dialog({
-						width: 600
-						,title: ' Example 7 - Using jQuery UI Dialog'
-						,autoOpen: true
-						,buttons: {
-							'View Source': function() {
-								viewSource(dg[0]);
-							}
-						}
-					});
-					
-					self.off('click.demo').on('click.demo',function(){
-						dg.dialog('open');
-					}).button('option','label','Show Dialog').button('enable');
-					
+				if ( $.isFunction(plugins[dg[0].id]) ) {
+					plugins[dg[0].id].call([],self,dg)
 				} else {
 					
 					self.button('destroy').remove();

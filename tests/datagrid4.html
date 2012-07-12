@@ -43,7 +43,7 @@ var dataGridJSON = {
 	,onClickRow: function(row) {
 		var l = [],d = [];
 		
-		$(row.cells).each(function(k,v){
+		$.each(row.cells,function(k,v){
 			l[l.length] = '<li><a href="#d'+k+'">td '+k+'</a></li>';
 			d[d.length] = '<div id="d'+k+'" class="ui-state-active ui-corner-all" style="margin:3px;padding:3px">'+v.innerHTML+'</div>';
 		})
