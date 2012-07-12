@@ -123,6 +123,7 @@
 			
 			// plugin params
 			this._offset = 0;
+			this._lastNumberRow = 0;
 			this._totalPages = 0;
 			
 			// tbody events
@@ -303,15 +304,15 @@
 			
 			row = auxTh = self = col = cols = helper = th = null;
 		}
-		,_createRows: function(json,origin) {
+		,_createRows: function(json,origin,appendRow) {
 		
 			var self = this
 				,theadThs = self.getThead()[0].rows[0].cells
-				,oTbody = self.uiDataGridTbody.empty()[0]
+				,oTbody = appendRow ? self.uiDataGridTbody[0] : self.uiDataGridTbody.empty()[0]
 				,row
 				,cell
 				,cls = 'ui-widget ui-widget-content'
-				,offset = self._offset + 1
+				,offset = appendRow ? (oTbody.rows.length + 1) : (self._offset + 1)
 				,localPagination = ('local' === origin && self.options.pagination)
 				// this not good!!!
 				,num_rows = ( undefined === json.num_rows )
@@ -328,22 +329,23 @@
 			json = json.rows || json;
 
 			// local pagination
-			if ( localPagination && offset > 1 ) {
+			if ( !appendRow && localPagination && offset > 1 ) {
 				// seek?
 				json = json.slice(self._offset);
 			}
 
-			// manage paginantion
-			self._managePagination(num_rows);
-		
-			// reset scroll
-			self.uiDataGridScrollBody.scrollTop(0);
-			
+			if ( !appendRow ) {
+				// manage paginantion
+				self._managePagination(num_rows);
+				// reset scroll
+				self.uiDataGridScrollBody.scrollTop(0);
+			}
+	
 			// use each
 			$.each( json ,function(i,obj){
 
 				// break
-				if ( localPagination && i === self.options.limit ) {
+				if ( !appendRow && localPagination && i === self.options.limit ) {
 					return false
 				}
 			
@@ -353,9 +355,10 @@
 			
 				// row number
 				if ( self.options.rowNumber ) {
+					offset = offset + i;
 					cell = row.insertCell(0);
 					cell.className = 'ui-state-default ui-datagrid-cell-rownumber';
-					cell.innerHTML = '<div>'+(offset+i)+'</div>';
+					cell.innerHTML = '<div>'+(offset)+'</div>';
 				}
 				
 				// tds
@@ -584,7 +587,7 @@
 				(function(self){
 					var h = self.uiDataGrid.outerHeight() - self.element.height();
 					this.style.height = $(this).height() - h +'px';
-				}).call(this.uiDataGridScrollBody[0],this.element[0]);
+				}).call(this.uiDataGridScrollBody[0],this);
 			}
 			
 			return this;
@@ -625,6 +628,9 @@
 		}
 		,getTFoot: function(callback) {
 			return this._getBHF(this.uiDataGridTfoot,callback);
+		}
+		,addRow: function(json) {
+			this._createRows(json,null,true);
 		}
 	});
 
