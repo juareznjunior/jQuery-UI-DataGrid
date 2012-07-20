@@ -548,9 +548,10 @@
 						$(this).addClass('ui-state-highlight');
 
 						// execute callback
-						// context ui.datagrid
-						// param row clicked
-						ui.options.onClickRow.call(ui.element[0],this);
+						// @context ui.datagrid
+						// @param row clicked
+						// @param event
+						ui.options.onClickRow.call(ui.element[0],this,event);
 
 						// remove selected row
 						(function(domTbody){
