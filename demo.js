@@ -7,6 +7,8 @@
 		,modal: true
 		,autoOpen: false
 	});
+
+	$('#themeswitcher').themeswitcher()
 	
 	// injectJs
 	var isFileReady = function( readyState ) {	
