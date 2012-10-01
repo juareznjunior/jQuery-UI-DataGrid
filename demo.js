@@ -69,8 +69,15 @@
 		datagrid7: function(b,d) {
 			d.datagrid(dataGridJSON).dialog({
 				width: 600
-				,title: ' Example 7 - Using jQuery UI Dialog'
+				,title: ' Loading...'
 				,autoOpen: true
+				,open: function() {
+					setTimeout(function(){
+						d
+							.dialog('option','title',' Example 7 - Using jQuery UI Dialog')
+							.datagrid('load')
+					},1000)
+				}
 				,buttons: {
 					'View Source': function() {
 						viewSource(d[0]);
