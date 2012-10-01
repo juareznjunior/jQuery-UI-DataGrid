@@ -14,34 +14,48 @@
 
 	$.widget('ui.datagrid', {
 
-		// plugin options
 		options: {
 
-			// default 20
+			/**
+			 * Sql limit clause
+			 */
 			limit: 20
 
-			// params
-			//  - name
-			//  - title
-			//  - width
-			//  - align
-			//  - render -> callback
+			/**
+			 * Data Mapper
+			 * Usage:
+			 * mapper:[{
+			 *  name    : 'field_name'
+			 *  ,title  : 'Field Title'
+			 *  ,width  : 50
+			 *  ,align  : 'center|left|right'
+			 *  ,render : function(DOMCell,json.name,json) {}
+			 * }]
+			 *
+			 */
 			,mapper: []
 
-			// data grid body height
+
+			/**
+			 * Scroll height
+			 */
 			,height: 200
 
-			// params
-			//  - request params
-			//  - url ajax
-			//  - data local (JSON)
+			/**
+			 * Data store
+			 *
+			 * Ajax Request
+			 *  url and params OR
+			 *
+			 * data JSON local
+			 * 
+			 */
 			,jsonStore: {
-				params: {}
-				,url: ''
+				url: ''
+				,params: {}
 				,data: {}
 			}
-
-			// boolean
+			
 			,pagination: true
 			,refresh: false
 			,rowNumber: false
@@ -49,20 +63,43 @@
 			,autoRender: true
 			,autoLoad: true
 
-			// POST or GET
-			// default GET
+			/**
+			 * AJAX Request method
+			 */
 			,ajaxMethod: 'GET'
 
-			// string
+			/**
+			 * Datagrid title
+			 */
 			,title: ''
 
-			// callback
+			/**
+			 * Callback
+			 *
+			 * @context ui.datagrid
+			 * @param row clicked
+			 * @param event
+			 */
 			,onClickRow: false
+
+			/**
+			 * Callback
+			 *
+			 * @context ui.datagrid
+			 */
 			,onComplete: false
 			,onError: false
 
-			// json
-			,toolBarButtons:false
+			/**
+			 * Usage:
+			 * [{
+			 *   lable: 'My Button Label'
+			 *   ,icon: 'arrowthickstop-1-s'
+			 *   ,fn: function(event) {}
+			 * }]
+			 *
+			 */
+			,toolBarButtons: false
 		}
 		,_create: function() {
 		
@@ -216,8 +253,8 @@
 
 				// setters
 				self._totalPages = Math.ceil(num_rows / self.options.limit);
-				currentPage = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1);
-				infoPages = currentPage+' de '+self._totalPages+' ('+num_rows+')';
+				currentPage      = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1);
+				infoPages        = currentPage+' de '+self._totalPages+' ('+num_rows+')';
 
 				this.uiDataGridTdPagination.td.style.visibility = 'visible';
 
@@ -238,16 +275,17 @@
 		}
 		,_createColumns: function() {
 
-			var self = this
-				,auxTh
-				,row = []
-				,helper = '<div class="ui-widget ui-state-default" style="overflow:scroll;position:absolute;left:0"></div>'
-				,col = '<col></col>'
-				,cols = []
-				,th = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
-				,text
-				,w = 0
-				,sw = 0;
+			var self        = this
+				,auxTh      = null
+				,row        = []
+				,cols       = []
+				,text       = null
+				,w          = 0
+				,sw         = 0
+				,col        = '<col></col>'
+				,th         = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
+				,$helperTag = $('<div>')
+				,$helper    = $('<div class="ui-widget ui-state-default" style="overflow:scroll;position:absolute;left:0"></div>');
 			
 			// each mapper
 			$.map(self.options.mapper,function(obj,index){
@@ -255,8 +293,8 @@
 				text = obj.title || obj.name;
 				w = 10;
 
-				// th
-				auxTh = $(th).text(text);
+				// remove tags
+				auxTh = $(th).text($helperTag.html(text).text())
 				
 				// align
 				if ( /left|right|center/.test(obj.align) ) {
@@ -272,7 +310,7 @@
 				(function(div){
 					w = (Math.max(w,div.innerWidth()));
 					return div;
-				}( $(helper).text(text).appendTo(document.body) )).remove();
+				}( $helper.html(text).appendTo(document.body) )).remove();
 				
 				// append
 				cols[cols.length] = $(col).width(w)[0];
@@ -302,7 +340,7 @@
 			// create thead ths
 			$([self.uiDataGridThead[0].rows[0],self.uiDataGridTheadBody[0].rows[0]]).append(row);
 			
-			row = auxTh = self = col = cols = helper = th = null;
+			row = auxTh = self = col = cols = $helper = $helperTag = th = null;
 		}
 		,_createRows: function(json,origin,appendRow) {
 		
@@ -355,10 +393,9 @@
 			
 				// row number
 				if ( self.options.rowNumber ) {
-					offset = offset + i;
 					cell = row.insertCell(0);
 					cell.className = 'ui-state-default ui-datagrid-cell-rownumber';
-					cell.innerHTML = '<div>'+(offset)+'</div>';
+					cell.innerHTML = '<div>'+(offset + i)+'</div>';
 				}
 				
 				// tds
