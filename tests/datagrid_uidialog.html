@@ -33,12 +33,7 @@
 <script type="text/javascript" src="../minified/jquery.ui.datagrid.min.js"></script>
 <script>
 (function($){
-    var $dgLocal = $('#data-grid-local').dialog({
-		width:700
-		,height: 271
-		,resizable: false
-		,title: 'jQuery UI DataGrid - Dialog'
-	});
+    var $dgLocal = $('#data-grid-local')
     
     $dgLocal.datagrid({
         jsonStore: {
@@ -70,6 +65,7 @@
         }
         ,pagination: false
         ,rowNumber: true
+        ,autoLoad: false
         ,mapper:[{
             name: 'id',title:'Código',width:50,align:'center'
         },{
@@ -77,7 +73,21 @@
         },{
             name: 'empresa',title:'Empresa',align:'left'
         }]
-    })
+    }).dialog({
+        width:700
+        ,modal: true
+        ,resizable: false
+        ,title: 'Aguarde...'
+        ,open: function() {
+            setTimeout(function(){
+                $dgLocal
+                    .dialog('option','title','jQuery UI DataGrid - Dialog')
+                    .datagrid('load')
+            },1000)
+        }
+    });
+
+    $dgLocal.dialog('widget').find('a.ui-dialog-titlebar-close').remove();
     
 })(jQuery)
 </script>
