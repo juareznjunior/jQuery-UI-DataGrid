@@ -542,7 +542,14 @@
 				self.resize();
 
 				// load
-				(self.options.autoLoad && self.load());
+				if ( self.options.autoLoad ) {
+					// delay
+					setTimeout((function(ui){
+						return function() {
+							ui.load();
+						}
+					}(self)),300)
+				}
 				
 				// onComplete callback
 				if ( $.isFunction(self.options.onComplete) ) {
