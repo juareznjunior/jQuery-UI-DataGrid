@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset='utf-8'>
-<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css" />
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery.ui.datagrid.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery.syntax.core.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery.syntax.layout.list.css" rel="stylesheet" type="text/css" />
@@ -31,7 +31,6 @@ h1.ui-widget-content { background: none; }
 .example > button { margin-bottom: 10px}
 .example:last-child {margin-bottom:20px};
 
-.ui-widget {font-family: verdana, arial, sans-serif; font-size:1em !important}
 .ui-dialog .ui-dialog-title {font-weight:bold}
 .ui-dialog .ui-dialog-titlebar { padding: 0.2em 1em;}
 .ui-dialog .ui-dialog-content .ui-widget-form {-moz-box-shadow:none;-webkit-box-shadow:none;box-shadow:none}
@@ -80,9 +79,21 @@ iframe {
 .change-theme > div {
 	float:right;
 }
+body.overflow-hidden {
+	overflow-y: hidden
+}
+.full-size {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	width: 100%;
+	z-index: 100;
+	display: none;
+}
 </style>
 </head>
 <body class="ui-widget ui-widget-content">
+<div id="full" class="full-size"></div>
 <img src="imgs/parana-flag.png" style="position:fixed;right:14px" />
 <a href="https://github.com/juareznjunior/jQuery-UI-DataGrid"><img style="position: fixed; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
 <div id="header" class="ui-widget-header ui-corner-all">jQuery-UI-DataGrid by @juareznjunior</div>
@@ -119,10 +130,14 @@ iframe {
 		<h1 class="ui-widget ui-widget-content">Example 8 - Using datagrid on jquery.ui.tabs</h1>
 		<button data-source="datagrid8.html">load</button><div id="datagrid8"></div>
 	</div>
+	<div class="example">
+		<h1 class="ui-widget ui-widget-content">Example 9 - Full size</h1>
+		<button data-source="datagrid9.html">load</button><div id="datagrid9"></div>
+	</div>
 </div>
 <div id="dialog-source"></div>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/jquery-ui.min.js"></script>
 <script src="themeswitcher.js" type="text/javascript"></script>
 <script src="jquery.tablesorter.min.js"></script>
 <script src="minified/jquery.ui.datagrid.min.js"></script>
