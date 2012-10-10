@@ -36,6 +36,8 @@
 			
 			$.data(c[0],'src','tests/highlight/'+oldObj);
 			c = null;
+
+			$(doc.body).find('script').last().remove();
 		  }
 		};
 
@@ -90,17 +92,41 @@
 			}).button('option','label','Show Dialog').button('enable');
 		}
 		,datagrid8: function(b,d) {
+
 			d
+			.data('dataGridJSON',dataGridJSON)
 			.html('<ul><li><a href="#tabs-1">Grid 1</a></li><li><a href="#tabs-2">Grid 2</a></li><li><a href="#tabs-3">Grid 3</a></li></ul><div id="tabs-1"><p>Tab 1 content</p></div><div id="tabs-2"><p>Tab 2 content</p></div><div id="tabs-3"><p>Tab 3 content</p></div>')
 			.tabs({
 				show: function(event,ui) {
 					if ( undefined === $.data(ui.panel,'tabs-load') ) {
+						var dataGridJSON = $.data(this,'dataGridJSON');
 						dataGridJSON.title = 'DataGrid '+ui.tab.innerHTML
 						$(ui.panel).empty().datagrid(dataGridJSON);
 						$.data(ui.panel,'tabs-load',true);
 					}
 				}
 			})
+		}
+		,datagrid9: function(b,d) {
+
+			var $full = $('#full');
+
+			$(document.body).addClass('overflow-hidden');
+			$(window).scrollTop(0);
+
+			if ( undefined === b ) {
+				$full.show();
+				return;
+			}
+
+			$full
+				.data('isload',true)
+				.show()
+				.datagrid(dataGridJSON);
+
+			b.off('click.demo').on('click.demo',function(){
+				plugins.datagrid9();
+			}).button('option','label','Show DataGrid').button('enable');
 		}
 	};
 
@@ -121,7 +147,7 @@
 					plugins[dg[0].id].call([],self,dg)
 				} else {
 					
-					self.button('destroy').remove();
+					self.hide();
 					
 					dg.datagrid(dataGridJSON);
 				}
