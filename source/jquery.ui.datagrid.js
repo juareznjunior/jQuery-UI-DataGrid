@@ -84,10 +84,18 @@
 
 			/**
 			 * Callback
+			 * After render grid template
 			 *
 			 * @context ui.datagrid
 			 */
 			,onComplete: false
+
+			/**
+			 * Callback
+			 * Ajax Error
+			 *
+			 * @context ui.datagrid
+			 */
 			,onError: false
 
 			/**
@@ -283,9 +291,7 @@
 				,w          = 0
 				,sw         = 0
 				,col        = '<col></col>'
-				,th         = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
-				,$helperTag = $('<div>')
-				,$helper    = $('<div class="ui-widget ui-state-default" style="overflow:scroll;position:absolute;left:0"></div>');
+				,th         = '<th class="ui-widget ui-state-default" role="columnheader"></th>';
 			
 			// each mapper
 			$.map(self.options.mapper,function(obj,index){
@@ -294,7 +300,9 @@
 				w = 10;
 
 				// remove tags
-				auxTh = $(th).text($helperTag.html(text).text())
+				auxTh = $(th).html(text).text(function(){
+					return this.innerHTML;
+				});
 				
 				// align
 				if ( /left|right|center/.test(obj.align) ) {
@@ -305,12 +313,6 @@
 				if ( undefined !== obj.width ) {
 					w = obj.width;
 				}
-				
-				// ajuste do width - using div helper
-				(function(div){
-					w = (Math.max(w,div.innerWidth()));
-					return div;
-				}( $helper.html(text).appendTo(document.body) )).remove();
 				
 				// append
 				cols[cols.length] = $(col).width(w)[0];
@@ -331,16 +333,20 @@
 				self.uiDataGridScrollMain.width(sw)
 			}
 
-			// last col
-			$(cols).last().width('auto');
-
 			// create colgroup cols
-			$([self.uiDataGridColGroup1[0],self.uiDataGridColGroup2[0]]).append(cols);
+			$([self.uiDataGridColGroup1[0],self.uiDataGridColGroup2[0]]).append(cols.slice(0,-1));
 
 			// create thead ths
 			$([self.uiDataGridThead[0].rows[0],self.uiDataGridTheadBody[0].rows[0]]).append(row);
+
+			// column correct width
+			$(self.uiDataGridThead[0].rows[0].cells).slice(0,-1).map(function(i,w){
+				w = $(this).outerWidth();
+				self.uiDataGridColGroup1.children().eq(i).width(w);
+				self.uiDataGridColGroup2.children().eq(i).width(w);
+			});
 			
-			row = auxTh = self = col = cols = $helper = $helperTag = th = null;
+			row = auxTh = self = col = cols = th = null;
 		}
 		,_createRows: function(json,origin,appendRow) {
 		
@@ -478,7 +484,7 @@
 			});
 		}
 		,render: function() {
-			var self = this,cell,h;
+			var self = this,cell,delay = 0;
 			
 			if ( self._active() ) {
 				self.resetOffset();
@@ -530,30 +536,30 @@
 				self._createColumns();
 				
 				// hide thead helper
-				self.uiDataGridTheadBody.hide()
+				self.uiDataGridTheadBody.hide();
 				
 				// resize
 				self.resize();
 
 				// load
 				if ( self.options.autoLoad ) {
+					delay = 180;
 					// delay
 					setTimeout((function(ui){
 						return function() {
 							ui.load();
 						}
-					}(self)),300)
+					}(self)),delay)
 				}
 				
 				// onComplete callback
 				if ( $.isFunction(self.options.onComplete) ) {
-
+					// delay
 					setTimeout((function(ui){
 						return function(){
 							ui.options.onComplete.call(ui.element[0]);
 						}
-					}(self)),1);
-					
+					}(self)),(delay+1));
 				}
 			}
 
