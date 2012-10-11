@@ -529,14 +529,8 @@
 				// create columns
 				self._createColumns();
 				
-				// dimensions
-				h = self.uiDataGridThead.outerHeight();
-				
-				// set margin
-				self.uiDataGridTheadBody
-					.parent()
-					.css('marginTop',-h);
-				h = null;
+				// hide thead helper
+				self.uiDataGridTheadBody.hide()
 				
 				// resize
 				self.resize();
