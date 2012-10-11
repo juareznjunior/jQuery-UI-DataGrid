@@ -2,11 +2,11 @@
 <html>
 <head>
 <meta charset='utf-8'>
-<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css" />
+<title>juareznjunior/jQuery-UI-DataGrid @ GitHub</title>
+<link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.23/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery.ui.datagrid.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery.syntax.core.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery.syntax.layout.list.css" rel="stylesheet" type="text/css" />
-<title>juareznjunior/jQuery-UI-DataGrid @ GitHub</title>
 <style type="text/css">
 body {
     margin: 0;
@@ -23,6 +23,7 @@ h1.ui-widget-content { background: none; }
 #container {
 	margin: 0 auto;
 	width: 900px;
+	position: relative
 }
 
 #container.xhidden {visibility: hidden}
@@ -68,17 +69,12 @@ tr.foo-bar-xyz td {
 #example2 thead th {
 	cursor:pointer
 }
-iframe {
-	display:none
-}
+
 .change-theme {
-	margin: 10px auto 0;
-    overflow: hidden;
-    width: 900px;
+	width: 190px;
+	margin: 20px auto 0;
 }
-.change-theme > div {
-	float:right;
-}
+
 body.overflow-hidden {
 	overflow-y: hidden
 }
@@ -97,8 +93,8 @@ body.overflow-hidden {
 <img src="imgs/parana-flag.png" style="position:fixed;right:14px" />
 <a href="https://github.com/juareznjunior/jQuery-UI-DataGrid"><img style="position: fixed; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
 <div id="header" class="ui-widget-header ui-corner-all">jQuery-UI-DataGrid by @juareznjunior</div>
-<div class="change-theme"><div id="themeswitcher"></div></div>
 <div id="container" class="xhidden">
+	<div class="change-theme"><div id="themeswitcher"></div></div>
 	<div class="example">
 		<h1 class="ui-widget ui-widget-content">Example 1 - Basic Usage</h1><div id="datagrid"></div>
 	</div>

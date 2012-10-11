@@ -8,7 +8,11 @@
 		,autoOpen: false
 	});
 
-	$('#themeswitcher').themeswitcher()
+	$('#themeswitcher').themeswitcher({
+		imgpath: 'imgs/themeswitcher/'
+		,loadTheme: 'redmond'
+		,jqueryuiversion: '1.8.23'
+	})
 	
 	// injectJs
 	var isFileReady = function( readyState ) {	
