@@ -7,7 +7,9 @@
 .ui-datagrid-header {border-width: 0  0  1px 0 !important;}
 .ui-datagrid-header .ui-state-default,.ui-datagrid-body .ui-state-default,.ui-datagrid-body .ui-widget-content {padding: 3px}
 .ui-datagrid-header > table > thead > tr > th:last-child {width: 17px}
-.ui-datagrid-body {height:200px;overflow:scroll;overflow-x:hidden;border:0;}
+.ui-datagrid-body {height:200px;overflow:scroll;overflow-x:hidden;border:0;position:relative;}
+.ui-datagrid-body > table {position:absolute;z-index:20}
+.ui-datagrid-body > table:last-child {z-index:19;height:100%;}
 .ui-datagrid-body .ui-state-hover ,.ui-datagrid-body .ui-state-highlight {border:0}
 .ui-datagrid-body tr.ui-state-hover {cursor:default !important}
 .ui-datagrid-body td {font-weight:normal;overflow: hidden;}

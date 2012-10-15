@@ -167,8 +167,7 @@
 			}
 			
 			// plugin params
-			this._offset = 0;
-			this._lastNumberRow = 0;
+			this._offset     = 0;
 			this._totalPages = 0;
 			
 			// tbody events
@@ -196,6 +195,7 @@
 			// add dom span
 			self.uiDataGridTdPagination.childs.push($(td).children()[0])
 
+			// create pagination buttons
 			$.map(['first','prev','next','end'],function(n,b){
 
 				b = $('<button>').attr('name','data-grid-button-'+n).text(n).button({
@@ -213,6 +213,7 @@
 				return function(event) {
 
 					event.preventDefault();
+					event.stopPropagation();
 
 					if ( false === this.disabled ) {
 						var c = ['_',this.name.replace(/data-grid-button-/,''),'Page'];
@@ -300,9 +301,8 @@
 				w = 10;
 
 				// remove tags
-				auxTh = $(th).html(text).text(function(){
-					return this.innerHTML;
-				});
+				auxTh = $(th).html(text);
+				auxTh = auxTh.text(auxTh.text());
 				
 				// align
 				if ( /left|right|center/.test(obj.align) ) {
@@ -344,6 +344,15 @@
 				w = $(this).outerWidth();
 				self.uiDataGridColGroup1.children().eq(i).width(w);
 				self.uiDataGridColGroup2.children().eq(i).width(w);
+			});
+
+			// grid layout
+			$(self.uiDataGridTbody[0].parentNode).map(function(i,t){
+				$(t).clone().appendTo(t.parentNode)
+					.find('tbody')
+					.append('<tr><td class="ui-state-default ui-datagrid-cell-rownumber">&nbsp;'+Array(t.tHead.rows[0].cells.length).join('</td><td class="ui-widget ui-widget-content">&nbsp;')+'</td></tr>')
+					.prev()
+					.hide();
 			});
 			
 			row = auxTh = self = col = cols = th = null;
@@ -436,7 +445,18 @@
 			
 			// local data
 			if ( undefined === url || '' === url ) {
-				this._createRows(store.data,'local');
+
+				// valid JSON
+				url = (store.data.rows || store.data)[0];
+
+				if ( undefined === url  || undefined === url[o.mapper[0].name] ) {
+					alert('Invalid JSON');
+				} else {
+					this._createRows(store.data,'local');
+				}
+
+				url = null;
+
 				return;
 			}
 			
