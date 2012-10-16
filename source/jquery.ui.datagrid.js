@@ -339,7 +339,7 @@
 			// create thead ths
 			$([self.uiDataGridThead[0].rows[0],self.uiDataGridTheadBody[0].rows[0]]).append(row);
 
-			// column correct width
+			// correct column width
 			$(self.uiDataGridThead[0].rows[0].cells).slice(0,-1).map(function(i,w){
 				w = $(this).outerWidth();
 				self.uiDataGridColGroup1.children().eq(i).width(w);
@@ -348,11 +348,24 @@
 
 			// grid layout
 			$(self.uiDataGridTbody[0].parentNode).map(function(i,t){
-				$(t).clone().appendTo(t.parentNode)
-					.find('tbody')
-					.append('<tr><td class="ui-state-default ui-datagrid-cell-rownumber">&nbsp;'+Array(t.tHead.rows[0].cells.length).join('</td><td class="ui-widget ui-widget-content">&nbsp;')+'</td></tr>')
-					.prev()
-					.hide();
+
+				// clone table
+				t = $(t)
+						.clone()
+						.addClass('ui-datagrid-gridlayout')
+						.find('tbody')
+						.append('<tr><td class="ui-widget ui-widget-content">&nbsp;'+Array(t.tHead.rows[0].cells.length).join('</td><td class="ui-widget ui-widget-content">&nbsp;')+'</td></tr>')
+						.end()
+						.appendTo(t.parentNode);
+				
+				// hide thead
+				$(t[0].tHead).hide()
+
+				// update class if rowNumber
+				if ( self.options.rowNumber ) {
+					t[0].tBodies[0].rows[0].cells[0].className = 'ui-state-default ui-datagrid-cell-rownumber';
+				}
+
 			});
 			
 			row = auxTh = self = col = cols = th = null;
