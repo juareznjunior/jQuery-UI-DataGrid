@@ -7,19 +7,14 @@
 		,modal: true
 		,autoOpen: false
 	});
-
-	$('#themeswitcher').themeswitcher({
-		imgpath: 'imgs/themeswitcher/'
-		,loadTheme: 'redmond'
-		,jqueryuiversion: '1.8.23'
-	})
 	
 	// injectJs
-	var isFileReady = function( readyState ) {	
-		return ( ! readyState || readyState == 'loaded' || readyState == 'complete' );
-	}
-	,injectJs = function( oldObj,callback) {
-		var script = doc.createElement( 'script' ),src;
+	var injectJs = function( oldObj,callback) {
+		var script = doc.createElement( 'script' )
+			,src
+			,isFileReady = function( readyState ) {	
+				return ( ! readyState || readyState == 'loaded' || readyState == 'complete' );
+			};
 
 		script.src = 'tests/'+oldObj+'?ts='+(new Date()).getTime();
 
@@ -140,7 +135,9 @@
 		icons: {
 			primary: 'ui-icon-arrowrefresh-1-e'
 		}
-	}).on('click.demo',function(){
+	}).on('click.demo',function(e){
+
+		e.preventDefault();
 		
 		injectJs($(this).data('source'),(function(self,dg){
 			return function() {
@@ -148,7 +145,7 @@
 				dg.empty();
 				
 				if ( $.isFunction(plugins[dg[0].id]) ) {
-					plugins[dg[0].id].call([],self,dg)
+					plugins[dg[0].id].call([],self,dg);
 				} else {
 					
 					self.hide();
