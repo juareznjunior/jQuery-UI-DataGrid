@@ -1,0 +1,50 @@
+var dataGridJSON = {
+	jsonStore: {
+		data: {"rows":[
+			{"id":"1","nome":"Fulano de Tal","empresa":"Empresa 1"}
+			,{"id":"2","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"3","nome":"Beltrano da Silva","empresa":"Empresa do tal"}
+			,{"id":"4","nome":"Beltrano da Silva","empresa":"Empresa 123122"}
+			,{"id":"5","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"6","nome":"Beltrano da Silva","empresa":"Empresa 3312"}
+			,{"id":"7","nome":"Beltrano da Silva","empresa":"Empresa 312"}
+			,{"id":"8","nome":"Beltrano da Silva","empresa":"Empresa 3123122"}
+			,{"id":"9","nome":"Fulano de Tal","empresa":"Empresa 221"}
+			,{"id":"10","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"11","nome":"Beltrano da Silva","empresa":"Empresa 3123122"}
+			,{"id":"12","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"13","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"14","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"15","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"16","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"17","nome":"Fulano de Tal","empresa":"Empresa 2"}
+			,{"id":"18","nome":"Beltrano da Silva","empresa":"Empresa 1232"}
+			,{"id":"18","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"20","nome":"Fulano de Tal","empresa":"Empresa 2"}
+			,{"id":"21","nome":"Beltrano da Silva","empresa":"Empresa23 2"}
+			,{"id":"22","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+			,{"id":"23","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
+		]}
+	}
+	,pagination: false
+	,title: 'jQuery UI DataGrid - Using local pagination - Full size'
+	,rowNumber:true
+	,fit: true
+	,onClickRow: function() {}
+	,toolBarButtons:[{
+		label: 'Return'
+		,icon: 'arrowreturn-1-w'
+		,fn: function(event) {
+			$(this).hide();
+			$(document.body).removeClass('overflow-hidden');
+			document.location = '#datagrid9'
+		}
+	}]
+	,mapper:[{
+		name: 'id',title:'Código',width:50,align:'center'
+	},{
+		name: 'nome',title:'Nome',width:200,align:'left'
+	},{
+		name: 'empresa',title:'Empresa',align:'left'
+	}]
+}
