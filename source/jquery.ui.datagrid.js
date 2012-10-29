@@ -12,12 +12,15 @@
  */
 ;(function($,window,document,undefined) {
 
+	'use strict';
+
+	// plugin
 	$.widget('ui.datagrid', {
 
 		options: {
 
 			/**
-			 * Sql limit clause
+			 * limit clause
 			 */
 			limit: 20
 
@@ -110,6 +113,11 @@
 			,toolBarButtons: false
 		}
 		,_create: function() {
+
+			// render container
+			if ( this.element.css('display') === 'none' ) {
+				this.element.show();
+			}
 		
 			// helper
 			var uiDataGridTables = [],contentScroll;
@@ -124,7 +132,7 @@
 				} else {
 					contentScroll = this.parentNode.parentNode;
 				}
-			});
+			}).end();
 
 			// grid title
 			if ( this.options.title === '' ) {
@@ -341,7 +349,7 @@
 
 			// correct column width
 			$(self.uiDataGridThead[0].rows[0].cells).slice(0,-1).map(function(i,w){
-				w = $(this).outerWidth();
+				w = $(w).outerWidth();
 				self.uiDataGridColGroup1.children().eq(i).width(w);
 				self.uiDataGridColGroup2.children().eq(i).width(w);
 			});
@@ -357,9 +365,8 @@
 						.append('<tr><td class="ui-widget ui-widget-content">&nbsp;'+Array(t.tHead.rows[0].cells.length).join('</td><td class="ui-widget ui-widget-content">&nbsp;')+'</td></tr>')
 						.end()
 						.appendTo(t.parentNode);
-				
-				// hide thead
-				$(t[0].tHead).hide()
+
+				$(t[0].tHead).remove();
 
 				// update class if rowNumber
 				if ( self.options.rowNumber ) {
@@ -367,6 +374,8 @@
 				}
 
 			});
+
+			$(self.uiDataGridTheadBody[0].parentNode.tHead).hide();
 			
 			row = auxTh = self = col = cols = th = null;
 		}
@@ -416,28 +425,30 @@
 				}
 			
 				// tr
-				row = oTbody.insertRow(-1);
+				row           = oTbody.insertRow(-1);
 				row.className = 'ui-state-hover';
+
+				// create row data, using current json mapper
+				$.data(row,'row-json',obj);
 			
 				// row number
 				if ( self.options.rowNumber ) {
-					cell = row.insertCell(0);
-					cell.className = 'ui-state-default ui-datagrid-cell-rownumber';
-					cell.innerHTML = '<div>'+(offset + i)+'</div>';
+					$(row.insertCell(0)).addClass('ui-state-default ui-datagrid-cell-rownumber').html('<div>'+(offset + i)+'</div>');
 				}
 				
 				// tds
 				$.map(self.options.mapper,function(td,j){
-					cell = row.insertCell(-1);
-					cell.className = cls;
+					cell               = row.insertCell(-1);
+					cell.className     = cls;
 					cell.style.cssText = 'text-align:'+theadThs[cell.cellIndex].style.textAlign;
+
+					// html cell
 					$(cell).html(
 						$.isFunction(td.render)
 							// if options.render is a function
 							// @context cell
 							// @param content
-							// @param json row
-							? td.render.call(cell,obj[td.name],obj)
+							? td.render.call(cell,obj[td.name])
 
 							// default
 							// mapper.row.fieldName
@@ -450,11 +461,11 @@
 		}
 		,_ajax: function() {
 
-			var o = this.options
-				,url = o.jsonStore.url
-				,limit = o.limit
+			var o       = this.options
+				,url    = o.jsonStore.url
+				,limit  = o.limit
 				,offset = this._offset
-				,store = o.jsonStore;
+				,store  = o.jsonStore;
 			
 			// local data
 			if ( undefined === url || '' === url ) {
@@ -557,19 +568,11 @@
 					cell = null;
 				}
 				
-				// render container
-				if ( self.element.css('display') === 'none' ) {
-					self.element.show();
-				}
-				
 				// create ui-datagrid
 				self.uiDataGrid.appendTo(self.element);
 				
 				// create columns
 				self._createColumns();
-				
-				// hide thead helper
-				self.uiDataGridTheadBody.hide();
 				
 				// resize
 				self.resize();
