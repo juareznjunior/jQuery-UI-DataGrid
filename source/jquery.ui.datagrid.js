@@ -102,6 +102,11 @@
 			,onError: false
 
 			/**
+			 * empty rows, request or local data
+			 */
+			,emptyDataMessage: 'Empty rows'
+
+			/**
 			 * Usage:
 			 * [{
 			 *   lable: 'My Button Label'
@@ -123,7 +128,7 @@
 			var uiDataGridTables = [],contentScroll;
 			
 			// container datagrid
-			this.uiDataGrid = $(getTemplateDataGrid());
+			this.uiDataGrid = $(_getTemplateDataGrid());
 			
 			// tables in container
 			this.uiDataGrid.find('table').filter(function(){
@@ -156,11 +161,10 @@
 			this.uiDataGridScrollBody = $(uiDataGridTables[1].parentNode).height(this.options.height);
 			this.uiDataGridScrollMain = $(contentScroll);
 
-			// pagination td cache
+			// pagination cache elements
 			// initial config
 			this.uiDataGridTdPagination = {
-				td: []
-				,childs: []
+				childs: []
 			};
 
 			// clear
@@ -168,17 +172,17 @@
 
 			// set data-rowselected
 			$.data(this.uiDataGridTbody[0],'rowselected',$([]));
-
-			if ( true === this.options.pagination ) {
-				// create and disable buttons 
-				this._createPageButtons();
-			}
 			
-			// plugin params
+			// pagination params
+			this._num_rows   = 0;
 			this._offset     = 0;
 			this._totalPages = 0;
+
+			// create pagination, initial config
+			// se _updatePagination()
+			this._createPagination();
 			
-			// tbody events
+			// tBodie onClickRow
 			this._tbodyEvents();
 		}
 		,_init: function() {
@@ -193,103 +197,6 @@
 				$.Widget.prototype._setOption.apply(this,arguments);
 			}
 		}
-		,_createPageButtons: function() {
-		
-			var self = this
-				,td = $(self.uiDataGridTfoot[0].rows[0].cells).last()[0];
-
-			// setter dom td cache
-			self.uiDataGridTdPagination.td = td;
-			// add dom span
-			self.uiDataGridTdPagination.childs.push($(td).children()[0])
-
-			// create pagination buttons
-			$.map(['first','prev','next','end'],function(n,b){
-
-				b = $('<button>').attr('name','data-grid-button-'+n).text(n).button({
-					icons: { primary: 'ui-icon-seek-'+n}
-					,text: false
-					,disabled: true
-				}).appendTo(td);
-
-				// add dom button
-				self.uiDataGridTdPagination.childs.push(b[0]);
-			});
-
-			// prev next event
-			$(td).on('click','button.ui-button',(function(self){
-				return function(event) {
-
-					event.preventDefault();
-					event.stopPropagation();
-
-					if ( false === this.disabled ) {
-						var c = ['_',this.name.replace(/data-grid-button-/,''),'Page'];
-
-						// disable buttons
-						$(self.uiDataGridTdPagination.childs).filter('button').removeClass('ui-state-hover ui-state-focus').button('disable');
-
-						// call private method
-						// _nextPage
-						// _prevPage
-						// _endPage
-						// _firstPage
-						self[c.join('')]();
-
-						// load
-						self.load();
-
-						// clear
-						c = null;
-					}
-
-					return false;
-				
-				}
-			})(self));
-
-			td = self = null;
-		}
-		,_managePagination: function(num_rows) {
-
-			var self = this,currentPage,infoPages;
-
-			// 
-			// using keys num_rows and rows
-			// {"num_rows": number,rows:[{"foo":"bar","date":date},{"foo":"bar","date":date}]}
-			//
-			// using num_rows mapper
-			// [{"num_rows":number,"foo":"bar","date":date}]
-			//
-			// disable pagination via request
-			// [{"foo":"bar","date":date},{"foo":"bar","date":date},{"foo":"bar","date":date}]
-			// [] | {}
-			//
-
-			if ( self.options.pagination && num_rows ) {
-
-				// setters
-				self._totalPages = Math.ceil(num_rows / self.options.limit);
-				currentPage      = (self._offset == 0 ) ? 1 : ((self._offset / self.options.limit) + 1);
-				infoPages        = currentPage+' de '+self._totalPages+' ('+num_rows+')';
-
-				this.uiDataGridTdPagination.td.style.visibility = 'visible';
-
-				$.each(this.uiDataGridTdPagination.childs,function(){
-					if (/span/i.test(this.tagName)) {
-						// update info
-						this.innerHTML = infoPages
-					} else {
-						// enable buttons
-						(/data-grid-button-(first|prev)/.test(this.name))
-							? (self._offset > 0 && this.disabled && $(this).button('enable'))
-							: (self._totalPages > currentPage && this.disabled && $(this).button('enable'))
-					}
-				});
-			}
-
-			self = null;
-		}
 		,_createColumns: function() {
 
 			var self        = this
@@ -300,13 +207,14 @@
 				,w          = 0
 				,sw         = 0
 				,col        = '<col></col>'
-				,th         = '<th class="ui-widget ui-state-default" role="columnheader"></th>';
+				,th         = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
+				,al         = 'ui-datagrid-align-';
 			
 			// each mapper
 			$.map(self.options.mapper,function(obj,index){
 			
 				text = obj.title || obj.name;
-				w = 10;
+				w    = 10;
 
 				// remove tags
 				auxTh = $(th).html(text);
@@ -314,7 +222,9 @@
 				
 				// align
 				if ( /left|right|center/.test(obj.align) ) {
-					auxTh[0].style.textAlign = obj.align;
+					$(auxTh[0]).data('text-align',al+obj.align).addClass(al+obj.align);
+				} else {
+					$(auxTh[0]).data('text-align',al+'left').addClass(al+'left');
 				}
 
 				// width
@@ -377,20 +287,22 @@
 
 			$(self.uiDataGridTheadBody[0].parentNode.tHead).hide();
 			
-			row = auxTh = self = col = cols = th = null;
+			row = auxTh = self = col = cols = th = al = null;
 		}
 		,_createRows: function(json,origin,appendRow) {
-		
-			var self = this
-				,theadThs = self.getThead()[0].rows[0].cells
-				,oTbody = appendRow ? self.uiDataGridTbody[0] : self.uiDataGridTbody.empty()[0]
+
+			var self             = this
+				,theadThs        = self.getThead()[0].rows[0].cells
+				,oTbody          = appendRow ? self.uiDataGridTbody[0] : self.uiDataGridTbody.empty()[0]
+				,cls             = 'ui-widget ui-widget-content'
+				,offset          = appendRow ? (oTbody.rows.length + 1) : (self._offset + 1)
+				,localPagination = (!appendRow && 'local' === origin && self.options.pagination)
 				,row
-				,cell
-				,cls = 'ui-widget ui-widget-content'
-				,offset = appendRow ? (oTbody.rows.length + 1) : (self._offset + 1)
-				,localPagination = ('local' === origin && self.options.pagination)
-				// this not good!!!
-				,num_rows = ( undefined === json.num_rows )
+				,cell;
+
+			// set _num_rows
+			if ( self._num_rows === 0 ) {
+				self._num_rows = ( undefined === json.num_rows )
 					? ( undefined === json.rows )
 						? ( undefined === json[0].num_rows )
 							? json.length
@@ -399,28 +311,22 @@
 							? json.rows.length
 							: json.rows[0].num_rows
 					: json.num_rows;
+			}
 
 			// correct JSON
 			json = json.rows || json;
 
 			// local pagination
-			if ( !appendRow && localPagination && offset > 1 ) {
+			if ( localPagination && offset > 1) {
 				// seek?
 				json = json.slice(self._offset);
 			}
 
-			if ( !appendRow ) {
-				// manage paginantion
-				self._managePagination(num_rows);
-				// reset scroll
-				self.uiDataGridScrollBody.scrollTop(0);
-			}
-	
 			// use each
 			$.each( json ,function(i,obj){
 
 				// break
-				if ( !appendRow && localPagination && i === self.options.limit ) {
+				if ( localPagination && i === self.options.limit ) {
 					return false
 				}
 			
@@ -438,26 +344,251 @@
 				
 				// tds
 				$.map(self.options.mapper,function(td,j){
-					cell               = row.insertCell(-1);
-					cell.className     = cls;
-					cell.style.cssText = 'text-align:'+theadThs[cell.cellIndex].style.textAlign;
+					cell = row.insertCell(-1);
+					cell.className = cls+' '+$.data(theadThs[cell.cellIndex],'text-align');
 
-					// html cell
-					$(cell).html(
-						$.isFunction(td.render)
-							// if options.render is a function
-							// @context cell
-							// @param content
-							? td.render.call(cell,obj[td.name])
+					// render
+					$(cell)
+						.html(
+							$.isFunction(td.render)
+								// if options.render is a function
+								// @context cell
+								// @param content
+								? td.render.call(cell,obj[td.name])
 
-							// default
-							// mapper.row.fieldName
-							: obj[td.name]
-					);
+								// default
+								// mapper.row.fieldName
+								: obj[td.name]
+						);
 				});
 			});
+
+			if ( !appendRow ) {
+				// update paginantion
+				this._updatePagination()
+
+				// reset scroll
+				self.uiDataGridScrollBody.scrollTop(0);
+			}
 			
 			theadThs = oTbody = row = cell = self = json = null;
+		}
+		,_createPagination: function() {
+
+			if ( true === this.options.pagination ) {
+
+				var self = this
+					,td = $(this.uiDataGridTfoot[0].rows[0].cells).last()[0];
+
+				// add dom span
+				self.uiDataGridTdPagination.childs.push($(td).children()[0])
+
+				// create pagination buttons
+				$.map(['first','prev','next','end'],function(n,b){
+
+					b = $('<button>').attr('name','data-grid-button-'+n).text(n).button({
+						icons: { primary: 'ui-icon-seek-'+n}
+						,text: false
+						,disabled: true
+					}).appendTo(td);
+
+					// add dom button
+					self.uiDataGridTdPagination.childs.push(b[0]);
+
+					b = null;
+				});
+
+				// prev next event
+				$(td).on('click','button.ui-button',(function(self){
+					return function(event) {
+
+						event.preventDefault();
+						event.stopPropagation();
+
+						if ( false === this.disabled ) {
+
+							var c = ['_',this.name.replace(/data-grid-button-/,''),'Page'];
+
+							// disable buttons
+							$(self.uiDataGridTdPagination.childs).filter('button').removeClass('ui-state-hover ui-state-focus').button('disable');
+
+							// call private method
+							// _nextPage
+							// _prevPage
+							// _endPage
+							// _firstPage
+							self[c.join('')]();
+
+							// load
+							self.load();
+
+							// clear
+							c = null;
+						}
+
+						return false;
+					
+					}
+				})(self));
+
+				// show td buttons
+				td.style.visibility = 'visible';
+
+				self = td = null;
+			}
+
+		}
+		,_updatePagination: function() {
+
+			var currentPage
+				,infoPages;
+
+			// 
+			// using keys num_rows and rows
+			// {"num_rows": number,rows:[{"foo":"bar","date":date},{"foo":"bar","date":date}]}
+			//
+			// using num_rows mapper
+			// [{"num_rows":number,"foo":"bar","date":date}]
+			//
+			// disable pagination via request
+			// [{"foo":"bar","date":date},{"foo":"bar","date":date},{"foo":"bar","date":date}]
+			// [] | {}
+			//
+
+			if ( this.options.pagination && this._num_rows ) {
+
+				// setters
+				this._totalPages = Math.ceil(this._num_rows / this.options.limit);
+				currentPage      = (this._offset == 0 ) ? 1 : ((this._offset / this.options.limit) + 1);
+				infoPages        = currentPage+' de '+this._totalPages+' ('+this._num_rows+')';
+
+				(function(self){
+					$.map(self.uiDataGridTdPagination.childs,function(b){
+						if (/span/i.test(b.tagName)) {
+							// update info
+							$(b).text(infoPages)
+						} else {
+							// enable buttons
+							(/data-grid-button-(first|prev)/.test(b.name))
+								? (self._offset > 0 && b.disabled && $(b).button('enable'))
+								: (self._totalPages > currentPage && b.disabled && $(b).button('enable'))
+						}
+					});
+				}(this));
+			}
+		}
+		,_createToolBarButtons: function() {
+
+			if ( $.isArray(this.options.toolBarButtons) ) {
+
+				// cell to append btns
+				var self = this
+					,cell = this.uiDataGridTfoot[0].rows[0].cells[0];
+
+				// each button
+				$.map(self.options.toolBarButtons,function(b,i){
+
+					(function(ui){
+
+						if ( $.isFunction(b.fn) ) {
+
+							this.on('click',function(event){
+
+								event.preventDefault();
+								event.stopPropagation();
+
+								b.fn.apply(ui.element[0],arguments);
+								$(this).blur();
+
+							});
+						}
+						
+						// button
+						this.button({
+							icons:{
+								primary: (undefined === b.icon) ? null : 'ui-icon-'+b.icon
+							}
+						});
+						
+						// append button
+						cell.appendChild(this[0]);
+						
+					}).call( $('<button>').text(b.label),self);
+				});
+
+				cell = self = null;
+			}
+		}
+		,_tbodyEvents: function() {
+				
+			if ( $.isFunction(this.options.onClickRow) ) {
+
+				// delegate
+				this.uiDataGridTbody.off().on('click','tr.ui-state-hover',(function(ui) {
+
+					return function(event) {
+
+						// highlight
+						$(this).addClass('ui-state-highlight');
+
+						// execute callback
+						// @context ui.datagrid
+						// @param row clicked
+						// @param event
+						ui.options.onClickRow.call(ui.element[0],this,event);
+
+						// remove selected row
+						(function(domTbody){
+							
+							// get clicked row
+							var rowSelected = $.data(domTbody,'rowselected');
+
+							// this = clicked row
+							(event.currentTarget !== rowSelected[0] && rowSelected.removeClass('ui-state-highlight'));
+
+							// set current row clicked
+							$.data(domTbody,'rowselected',$(event.currentTarget));
+							
+							// clear
+							rowSelected = null;
+
+						})(ui.uiDataGridTbody[0]);
+					}
+
+				})(this));
+			}
+
+		}
+		,_nextPage: function() {
+			this._offset += this.options.limit;
+		}
+		,_prevPage: function() {
+			this._offset -= this.options.limit;
+		}
+		,_endPage: function() {
+			this._offset = (this._totalPages * this.options.limit) - this.options.limit;
+		}
+		,_firstPage: function() {
+			this._offset = 0;
+		}
+		,_active: function() {
+			return this.element.children(':eq(0)').hasClass('ui-datagrid-container');
+		}
+		,_getBHF: function(bfh,callback) {
+			return ($.isFunction(callback))
+				? callback.call(bfh[0])
+				: bfh;
+		}
+		,_message: function(m) {
+
+			var c = '<td class="ui-widget ui-datagrid-align-center ui-state-error" colspan="1000">'+m+'</td>';
+			if ( this.options.rowNumber ) {
+				c = '<td class="ui-state-default ui-datagrid-cell-rownumber"><div></div></td>'+c;
+			}
+
+			$('<tr>'+c+'</tr>').appendTo(this.uiDataGridTbody[0]);
+
+			c = null;
 		}
 		,_ajax: function() {
 
@@ -474,8 +605,9 @@
 				url = (store.data.rows || store.data)[0];
 
 				if ( undefined === url  || undefined === url[o.mapper[0].name] ) {
-					alert('Invalid JSON');
+					this._message('Invalid JSON or empty data');
 				} else {
+					// create rows
 					this._createRows(store.data,'local');
 				}
 
@@ -516,7 +648,13 @@
 						if ( $.isFunction(this.options.onError) ) {
 							this.options.onError.call(this.element[0]);
 						} else {
-							alert((0=== this.length) ? 'Empty rows' : this.error);
+							json = (undefined !== json.error)
+								? json.error
+								: ( json.length === 0 )
+									? this.options.emptyDataMessage
+									: 'Invalid JSON';
+
+							this._message(json);
 						}
 
 						return false;
@@ -528,45 +666,15 @@
 			});
 		}
 		,render: function() {
-			var self = this,cell,delay = 0;
+			var self = this,delay = 0;
 			
 			if ( self._active() ) {
 				self.resetOffset();
 				self.load()
 			} else {
-				if ( $.isArray(self.options.toolBarButtons) ) {
-
-					// cell to append btns
-					cell = self.uiDataGridTfoot[0].rows[0].cells[0];
-
-					// each button
-					$.map(self.options.toolBarButtons,function(b,i){
-
-						(function(ui){
-
-							if ( $.isFunction(b.fn) ) {
-
-								this.on('click',function(event){
-									event.preventDefault();
-									b.fn.apply(ui.element[0],arguments);
-									$(this).blur();
-									return false;
-								});
-							}
-							
-							this.button({
-								icons:{
-									primary: (undefined === b.icon) ? null : 'ui-icon-'+b.icon
-								}
-							});
-							
-							cell.appendChild(this[0]);
-							
-						}).call( $('<button>').text(b.label),self);
-					});
-
-					cell = null;
-				}
+				
+				// config buttons
+				self._createToolBarButtons();
 				
 				// create ui-datagrid
 				self.uiDataGrid.appendTo(self.element);
@@ -600,69 +708,6 @@
 			}
 
 			self = null;
-			
-			return this;
-		}
-		,_nextPage: function() {
-			this._offset += this.options.limit;
-		}
-		,_prevPage: function() {
-			this._offset -= this.options.limit;
-		}
-		,_endPage: function() {
-			this._offset = (this._totalPages * this.options.limit) - this.options.limit;
-		}
-		,_firstPage: function() {
-			this._offset = 0;
-		}
-		,_tbodyEvents: function() {
-			
-			if ( $.isFunction(this.options.onClickRow) ) {
-
-				// delegate
-				this.uiDataGridTbody.off().on('click','tr',(function(ui) {
-
-					return function(event) {
-
-						// highlight
-						$(this).addClass('ui-state-highlight');
-
-						// execute callback
-						// @context ui.datagrid
-						// @param row clicked
-						// @param event
-						ui.options.onClickRow.call(ui.element[0],this,event);
-
-						// remove selected row
-						(function(domTbody){
-							
-							// get clicked row
-							var rowSelected = $.data(domTbody,'rowselected');
-
-							// this = clicked row
-							(event.currentTarget !== rowSelected[0] && rowSelected.removeClass('ui-state-highlight'));
-
-							// set current row clicked
-							$.data(domTbody,'rowselected',$(event.currentTarget));
-							
-							// clear
-							rowSelected = null;
-
-						})(ui.uiDataGridTbody[0]);
-					}
-
-				})(this));
-			}
-
-			return this;
-		}
-		,_active: function() {
-			return this.element.children(':eq(0)').hasClass('ui-datagrid-container');
-		}
-		,_getBHF: function(bfh,callback) {
-			return ($.isFunction(callback))
-				? callback.call(bfh[0])
-				: bfh;
 		}
 		,resize: function() {
 			// fit to parent
@@ -672,8 +717,6 @@
 					this.style.height = $(this).height() - h +'px';
 				}).call(this.uiDataGridScrollBody[0],this);
 			}
-			
-			return this;
 		}
 		,getSelectedRow: function() {
 			return $.data(this.uiDataGridTbody[0],'rowselected');
@@ -688,7 +731,6 @@
 		}
 		,load: function() {
 			this._ajax();
-			return this;
 		}
 		,widget: function() {
 			return this.uiDataGrid;
@@ -717,9 +759,9 @@
 		}
 	});
 
-	// Helpers
+	// private
 
-	var getTemplateDataGrid = function() {
+	var _getTemplateDataGrid = function() {
 		return '<div class="ui-datagrid-container ui-widget ui-widget-content ui-corner-all">'
 			+'<div class="ui-state-default ui-datagrid-title"><div class="ui-widget-header"></div></div>'
 			+'<div class="ui-datagrid-content">'
@@ -764,4 +806,5 @@
 			+'</div>'
 		+'</div>';
 	};
+	
 }(jQuery,window,document));
