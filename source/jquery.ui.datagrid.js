@@ -586,7 +586,7 @@
 				c = '<td class="ui-state-default ui-datagrid-cell-rownumber"><div></div></td>'+c;
 			}
 
-			$('<tr>'+c+'</tr>').appendTo(this.uiDataGridTbody[0]);
+			$('<tr>'+c+'</tr>').appendTo(this.uiDataGridTbody.empty()[0]);
 
 			c = null;
 		}
