@@ -14,6 +14,8 @@
 
 	'use strict';
 
+	var JQUERY_UI_VERSION = parseFloat($.ui.version);
+
 	// plugin
 	$.widget('ui.datagrid', {
 
@@ -194,8 +196,18 @@
 			if ( 'jsonStore' === option && $.isPlainObject(value) ) {
 				this.options.jsonStore = $.extend({},this.options.jsonStore,value);
 			} else {
-				$.Widget.prototype._setOption.apply(this,arguments);
+				( JQUERY_UI_VERSION === 1.9 )
+					? this._super(option,value)
+					: $.Widget.prototype._setOption.apply(this,arguments);
 			}
+		}
+		,_destroy: function() {
+
+			if ( JQUERY_UI_VERSION < 1.9 ) {
+				$.Widget.prototype.destroy.call(this);
+			}
+
+			this.element.empty();
 		}
 		,_createColumns: function() {
 
@@ -735,15 +747,16 @@
 		,widget: function() {
 			return this.uiDataGrid;
 		}
-		,destroy: function() {
-			$.Widget.prototype.destroy.call(this);
-			this.element.empty();
-		}
 		,getOffset: function() {
 			return this._offset;
 		}
 		,resetOffset: function() {
+			this._num_rows = 0;
 			this._offset = 0;
+			if ( true === this.options.pagination ) {
+				// disable pagination buttons
+				$(this.uiDataGridTdPagination.childs).filter('button').button('disable');
+			}
 		}
 		,getThead: function(callback) {
 			return this._getBHF(this.uiDataGridThead,callback);
@@ -763,7 +776,7 @@
 
 	var _getTemplateDataGrid = function() {
 		return '<div class="ui-datagrid-container ui-widget ui-widget-content ui-corner-all">'
-			+'<div class="ui-state-default ui-datagrid-title"><div class="ui-widget-header"></div></div>'
+			+'<div class="ui-datagrid-title"><div class="ui-widget-header"></div></div>'
 			+'<div class="ui-datagrid-content">'
 				+'<div class="ui-datagrid-content-scroll">'
 					+'<div class="ui-datagrid-header ui-state-default">'
