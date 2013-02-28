@@ -770,6 +770,17 @@
 		,addRow: function(json) {
 			this._createRows(json,null,true);
 		}
+		,loadLocalData: function(json,callback) {
+			this.resetOffset();
+			this.options.jsonStore = {
+				url: ''
+				,params: {}
+				,data: json
+			};
+
+			this.load();
+			( $.isFunction(callback) && callback.call([]) );
+		}
 	});
 
 	// private
