@@ -207,6 +207,18 @@
 				$.Widget.prototype.destroy.call(this);
 			}
 
+			if ( $.isFunction(this.options.onClickRow) ) {
+				this.uiDataGridTbody.off();
+			}
+
+			if ( $.isArray(this.options.toolBarButtons) ) {
+				$(this.uiDataGridTfoot[0].rows[0].cells).find('button.ui-button').off();
+			}
+
+			if ( true === this.options.pagination ) {
+				$(this.uiDataGridTfoot[0].rows[0].cells).last().off();
+			}
+
 			this.element.empty();
 		}
 		,_createColumns: function() {
