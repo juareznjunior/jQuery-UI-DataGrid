@@ -14,7 +14,7 @@
 
 	'use strict';
 
-	var JQUERY_UI_VERSION = parseFloat($.ui.version);
+	var JQUERY_UI_VERSION = Number($.ui.version.replace(/[^0-9]/g,''));
 
 	// plugin
 	$.widget('ui.datagrid', {
@@ -196,7 +196,7 @@
 			if ( 'jsonStore' === option && $.isPlainObject(value) ) {
 				this.options.jsonStore = $.extend({},this.options.jsonStore,value);
 			} else {
-				( JQUERY_UI_VERSION === 1.9 )
+				( JQUERY_UI_VERSION >= 1.9 )
 					? this._super(option,value)
 					: $.Widget.prototype._setOption.apply(this,arguments);
 			}
