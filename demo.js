@@ -92,17 +92,31 @@
 		}
 		,datagrid8: function(b,d) {
 
+			b = function(self,panel,tab) {
+
+				if ( undefined === $(panel).data('tabs-load') ) {
+
+					var dataGridJSON = $(self).data('dataGridJSON');
+					dataGridJSON.title = 'DataGrid '+$(tab).text()
+
+					$(panel)
+						.empty()
+						.datagrid(dataGridJSON)
+						.data('tabs-load',true);
+
+					dataGridJSON = null;
+				}
+			};
+
 			d
 			.data('dataGridJSON',dataGridJSON)
 			.html('<ul><li><a href="#tabs-1">Grid 1</a></li><li><a href="#tabs-2">Grid 2</a></li><li><a href="#tabs-3">Grid 3</a></li></ul><div id="tabs-1"><p>Tab 1 content</p></div><div id="tabs-2"><p>Tab 2 content</p></div><div id="tabs-3"><p>Tab 3 content</p></div>')
 			.tabs({
-				show: function(event,ui) {
-					if ( undefined === $.data(ui.panel,'tabs-load') ) {
-						var dataGridJSON = $.data(this,'dataGridJSON');
-						dataGridJSON.title = 'DataGrid '+ui.tab.innerHTML
-						$(ui.panel).empty().datagrid(dataGridJSON);
-						$.data(ui.panel,'tabs-load',true);
-					}
+				create: function(event,ui) {
+					b(this,ui.panel,ui.tab);
+				}
+				,activate: function(event,ui) {
+					b(this,ui.newPanel,ui.newTab);
 				}
 			})
 		}
