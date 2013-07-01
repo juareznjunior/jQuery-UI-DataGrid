@@ -26,3 +26,4 @@
 .ui-datagrid-header th.ui-datagrid-align-center, .ui-datagrid-body td.ui-datagrid-align-center {text-align:center}
 .ui-datagrid-header th.ui-datagrid-align-left, .ui-datagrid-body td.ui-datagrid-align-left {text-align:left}
 .ui-datagrid-header th.ui-datagrid-align-right, .ui-datagrid-body td.ui-datagrid-align-right {text-align:right}
+.ui-datagrid-column-hide { display: none}

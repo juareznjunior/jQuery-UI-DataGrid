@@ -233,7 +233,8 @@
 				,sw         = 0
 				,col        = '<col></col>'
 				,th         = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
-				,al         = 'ui-datagrid-align-';
+				,al         = 'ui-datagrid-align-'
+				,ch         = 'ui-datagrid-column-hide';
 			
 			// each mapper
 			$.map(self.options.mapper,function(obj,index){
@@ -260,6 +261,12 @@
 				// append
 				cols[cols.length] = $(col).width(w)[0];
 				row[row.length] = auxTh[0];
+
+				// hide column
+				if ( undefined !== obj.hidden ) {
+					$(auxTh[0]).data('hidden',ch).addClass(ch);
+					$(cols).last().addClass(ch);
+				}
 
 				sw += w;
 			});
@@ -357,8 +364,7 @@
 				json = json.slice(self._offset);
 			}
 
-			// use each
-			$.each( json ,function(i,obj){
+			$.map( json ,function(obj,i){
 
 				// break
 				if ( localPagination && i === self.options.limit ) {
@@ -380,7 +386,14 @@
 				// tds
 				$.map(self.options.mapper,function(td,j){
 					cell = row.insertCell(-1);
-					cell.className = cls+' '+$(theadThs[cell.cellIndex]).data('text-align');
+					cell.className = cls;
+
+					// column classes
+					$.map($(theadThs[cell.cellIndex]).data(),function(v,k){
+						if ( /textAlign|text-align|hidden/.test(k) ) {
+							cell.className += ' '+v;
+						}
+					});
 
 					// render
 					$(cell)
