@@ -1,9 +1,10 @@
 /*!
  * jQuery UI datagrid
  * 
- * @autor:.....Juarez Gonçalves Nery Junior
- * @email:.....juareznjunior@gmail.com
- * @twitter:...@juareznjunior
+ * @autor:.....: Juarez Gonçalves Nery Junior
+ * @email:.....: juareznjunior@gmail.com
+ * @twitter:...: @juareznjunior
+ * @date.......: 2013-07-01
  * 
  * Depends:
  *	 jquery.ui.core.js
@@ -111,9 +112,9 @@
 			/**
 			 * Usage:
 			 * [{
-			 *   lable: 'My Button Label'
-			 *   ,icon: 'arrowthickstop-1-s'
-			 *   ,fn: function(event) {}
+			 *    lable: 'My Button Label'
+			 *   ,icon : 'arrowthickstop-1-s'
+			 *   ,fn   : function(event) {}
 			 * }]
 			 *
 			 */
@@ -145,7 +146,7 @@
 			if ( this.options.title === '' ) {
 				$(contentScroll.parentNode).prev().remove();
 			} else {
-				$(contentScroll.parentNode).prev().children().text(this.options.title)
+				$(contentScroll.parentNode).prev().children().text(this.options.title);
 			}
 
 			// remove tfoot if...
@@ -173,7 +174,7 @@
 			uiDataGridTables = contentScroll = null;
 
 			// set data-rowselected
-			$.data(this.uiDataGridTbody[0],'rowselected',$([]));
+			this.uiDataGridTbody.data('rowselected',$([]));
 			
 			// pagination params
 			this._num_rows   = 0;
@@ -266,20 +267,24 @@
 			// enable row number
 			if (self.options.rowNumber) {
 				cols.splice(0,0,$(col).width(20)[0]);
-				row.splice(0,0,$('<th class="ui-state-default ui-datagrid-cell-rownumber" role="columnheader"><div></div></th>')[0])
+				row.splice(0,0,$('<th class="ui-state-default ui-datagrid-cell-rownumber" role="columnheader"><div></div></th>')[0]);
 				sw += 20;
 			}
 
 			// enable overflow-y
 			if ( sw > self.element.width() ) {
-				self.uiDataGridScrollMain.width(sw)
+				self.uiDataGridScrollMain.width(sw);
 			}
 
 			// create colgroup cols
-			$([self.uiDataGridColGroup1[0],self.uiDataGridColGroup2[0]]).append(cols.slice(0,-1));
+			$([self.uiDataGridColGroup1[0],self.uiDataGridColGroup2[0]])
+				.empty() // update
+				.append(cols.slice(0,-1));
 
 			// create thead ths
-			$([self.uiDataGridThead[0].rows[0],self.uiDataGridTheadBody[0].rows[0]]).append(row);
+			$([self.uiDataGridThead[0].rows[0],self.uiDataGridTheadBody[0].rows[0]])
+				.empty() // update
+				.append(row);
 
 			// correct column width
 			$(self.uiDataGridThead[0].rows[0].cells).slice(0,-1).map(function(i,w){
@@ -290,6 +295,10 @@
 
 			// grid layout
 			$(self.uiDataGridTbody[0].parentNode).map(function(i,t){
+				
+				// if exists
+				i = $(t.parentNode).find('.ui-datagrid-gridlayout');
+				( i.length > 0 && i.remove() );
 
 				// clone table
 				t = $(t)
@@ -306,6 +315,8 @@
 				if ( self.options.rowNumber ) {
 					t[0].tBodies[0].rows[0].cells[0].className = 'ui-state-default ui-datagrid-cell-rownumber';
 				}
+				
+				t = i = null;
 
 			});
 
@@ -351,7 +362,7 @@
 
 				// break
 				if ( localPagination && i === self.options.limit ) {
-					return false
+					return false;
 				}
 			
 				// tr
@@ -359,7 +370,7 @@
 				row.className = 'ui-state-hover';
 
 				// create row data, using current json mapper
-				$.data(row,'row-json',obj);
+				$(row).data('row-json',obj);
 			
 				// row number
 				if ( self.options.rowNumber ) {
@@ -369,7 +380,7 @@
 				// tds
 				$.map(self.options.mapper,function(td,j){
 					cell = row.insertCell(-1);
-					cell.className = cls+' '+$.data(theadThs[cell.cellIndex],'text-align');
+					cell.className = cls+' '+$(theadThs[cell.cellIndex]).data('text-align');
 
 					// render
 					$(cell)
@@ -389,7 +400,7 @@
 
 			if ( !appendRow ) {
 				// update paginantion
-				this._updatePagination()
+				this._updatePagination();
 
 				// reset scroll
 				self.uiDataGridScrollBody.scrollTop(0);
@@ -405,7 +416,7 @@
 					,td = $(this.uiDataGridTfoot[0].rows[0].cells).last()[0];
 
 				// add dom span
-				self.uiDataGridTdPagination.childs.push($(td).children()[0])
+				self.uiDataGridTdPagination.childs.push($(td).children()[0]);
 
 				// create pagination buttons
 				$.map(['first','prev','next','end'],function(n,b){
@@ -423,7 +434,7 @@
 				});
 
 				// prev next event
-				$(td).on('click','button.ui-button',(function(self){
+				$(td).on('click.paginationUiDataGrid','button.ui-button',(function(self){
 					return function(event) {
 
 						event.preventDefault();
@@ -452,7 +463,7 @@
 
 						return false;
 					
-					}
+					};
 				})(self));
 
 				// show td buttons
@@ -483,19 +494,19 @@
 
 				// setters
 				this._totalPages = Math.ceil(this._num_rows / this.options.limit);
-				currentPage      = (this._offset == 0 ) ? 1 : ((this._offset / this.options.limit) + 1);
+				currentPage      = (this._offset === 0 ) ? 1 : ((this._offset / this.options.limit) + 1);
 				infoPages        = currentPage+' de '+this._totalPages+' ('+this._num_rows+')';
 
 				(function(self){
 					$.map(self.uiDataGridTdPagination.childs,function(b){
 						if (/span/i.test(b.tagName)) {
 							// update info
-							$(b).text(infoPages)
+							$(b).text(infoPages);
 						} else {
 							// enable buttons
 							(/data-grid-button-(first|prev)/.test(b.name))
 								? (self._offset > 0 && b.disabled && $(b).button('enable'))
-								: (self._totalPages > currentPage && b.disabled && $(b).button('enable'))
+								: (self._totalPages > currentPage && b.disabled && $(b).button('enable'));
 						}
 					});
 				}(this));
@@ -548,7 +559,7 @@
 			if ( $.isFunction(this.options.onClickRow) ) {
 
 				// delegate
-				this.uiDataGridTbody.off().on('click','tr.ui-state-hover',(function(ui) {
+				this.uiDataGridTbody.off().on('click.tbodyUiDataGrid','tr.ui-state-hover',(function(ui) {
 
 					return function(event) {
 
@@ -565,19 +576,19 @@
 						(function(domTbody){
 							
 							// get clicked row
-							var rowSelected = $.data(domTbody,'rowselected');
+							var rowSelected = $(domTbody).data('rowselected');
 
 							// this = clicked row
 							(event.currentTarget !== rowSelected[0] && rowSelected.removeClass('ui-state-highlight'));
 
 							// set current row clicked
-							$.data(domTbody,'rowselected',$(event.currentTarget));
+							$(domTbody).data('rowselected',$(event.currentTarget));
 							
 							// clear
 							rowSelected = null;
 
 						})(ui.uiDataGridTbody[0]);
-					}
+					};
 
 				})(this));
 			}
@@ -605,14 +616,8 @@
 		}
 		,_message: function(m) {
 
-			var c = '<td class="ui-widget ui-datagrid-align-center ui-state-error" colspan="1000">'+m+'</td>';
-			if ( this.options.rowNumber ) {
-				c = '<td class="ui-state-default ui-datagrid-cell-rownumber"><div></div></td>'+c;
-			}
-
-			$('<tr>'+c+'</tr>').appendTo(this.uiDataGridTbody.empty()[0]);
-
-			c = null;
+			$('<tr><td class="ui-widget ui-datagrid-align-center ui-state-error" colspan="1000">'+m+'</td></tr>')
+				.appendTo(this.uiDataGridTbody.empty()[0]);
 		}
 		,_ajax: function() {
 
@@ -645,7 +650,7 @@
 			if ('string' === typeof store.params) {
 				store.params = (0 === offset)
 					? store.params+'&limit='+limit+'&offset='+offset
-					: store.params.replace(/(&offset=)(.+)/,'&offset='+offset)
+					: store.params.replace(/(&offset=)(.+)/,'&offset='+offset);
 			} else {
 			
 				// ex: obj.datagrid('option','jsonStore',{url:'foo/bar'})
@@ -667,7 +672,7 @@
 				,context: this
 				,success: function(json) {
 
-					if ( undefined != json.error || 0 === json.length  ) {
+					if ( undefined !== json.error || 0 === json.length  ) {
 
 						if ( $.isFunction(this.options.onError) ) {
 							this.options.onError.call(this.element[0]);
@@ -677,7 +682,7 @@
 								: ( json.length === 0 )
 									? this.options.emptyDataMessage
 									: 'Invalid JSON';
-
+							
 							this._message(json);
 						}
 
@@ -694,7 +699,7 @@
 			
 			if ( self._active() ) {
 				self.resetOffset();
-				self.load()
+				self.load();
 			} else {
 				
 				// config buttons
@@ -716,8 +721,8 @@
 					setTimeout((function(ui){
 						return function() {
 							ui.load();
-						}
-					}(self)),delay)
+						};
+					}(self)),delay);
 				}
 				
 				// onComplete callback
@@ -726,7 +731,7 @@
 					setTimeout((function(ui){
 						return function(){
 							ui.options.onComplete.call(ui.element[0]);
-						}
+						};
 					}(self)),(delay+1));
 				}
 			}
@@ -743,14 +748,14 @@
 			}
 		}
 		,getSelectedRow: function() {
-			return $.data(this.uiDataGridTbody[0],'rowselected');
+			return this.uiDataGridTbody.data('rowselected');
 		}
 		,clearSelectedRow: function() {
 			(function(){
 				// remove highlight
-				$.data(this,'rowselected').removeClass('ui-state-highlight');
+				$(this).data('rowselected').removeClass('ui-state-highlight');
 				// reset
-				$.data(this,'rowselected',$([]));
+				$(this).data('rowselected',$([]));
 			}).call(this.uiDataGridTbody[0]);
 		}
 		,load: function() {
@@ -792,6 +797,12 @@
 
 			this.load();
 			( $.isFunction(callback) && callback.call([]) );
+		}
+		,updateColumns: function(newMapper) {
+			this.options.mapper = newMapper;
+			this.uiDataGridTbody.empty();
+			this._createColumns();
+			this.resetOffset();
 		}
 	});
 
