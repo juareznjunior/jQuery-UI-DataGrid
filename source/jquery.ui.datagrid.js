@@ -4,7 +4,7 @@
  * @autor:.....: Juarez Gonçalves Nery Junior
  * @email:.....: juareznjunior@gmail.com
  * @twitter:...: @juareznjunior
- * @date.......: 2013-08-23
+ * @date.......: 2013-10-25
  * 
  * Depends:
  *	 jquery.ui.core.js
