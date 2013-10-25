@@ -72,16 +72,16 @@
         ,rowNumber:true
         ,onClickRow: function() {}
         ,toolBarButtons:[{
-            label: 'Load'
+             text: 'Load'
             ,icon: 'arrowthickstop-1-s'
-            ,fn: function(event) {
+            ,click: function(event) {
                 $(this).datagrid('load');
                 $(event.currentTarget).trigger('mouseleave.button').button('disable');
             }
         },{
-            label: 'Clear Selected Row'
+            text: 'Clear Selected Row'
             ,icon: 'refresh'
-            ,fn: function(){
+            ,click: function(){
                 $(this).datagrid('clearSelectedRow')
             }
         }]
