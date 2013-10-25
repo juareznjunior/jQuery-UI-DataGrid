@@ -4,7 +4,7 @@
  * @autor:.....: Juarez Gonçalves Nery Junior
  * @email:.....: juareznjunior@gmail.com
  * @twitter:...: @juareznjunior
- * @date.......: 2013-07-01
+ * @date.......: 2013-08-23
  * 
  * Depends:
  *	 jquery.ui.core.js
@@ -95,6 +95,14 @@
 			 * @context ui.datagrid
 			 */
 			,onComplete: false
+			
+			/**
+			 * Callback
+			 * After ajax Load (success)
+			 * 
+			 * @context ui.datagrid
+			 */
+			,onAjaxSuccess: false
 
 			/**
 			 * Callback
@@ -112,9 +120,9 @@
 			/**
 			 * Usage:
 			 * [{
-			 *    lable: 'My Button Label'
+			 *    text: 'My Button Label'
 			 *   ,icon : 'arrowthickstop-1-s'
-			 *   ,fn   : function(event) {}
+			 *   ,click   : function(event) {}
 			 * }]
 			 *
 			 */
@@ -434,7 +442,7 @@
 				// create pagination buttons
 				$.map(['first','prev','next','end'],function(n,b){
 
-					b = $('<button>').attr('name','data-grid-button-'+n).text(n).button({
+					b = $('<button></button>').attr({name:'data-grid-button-'+n,type:'button'}).text(n).button({
 						icons: { primary: 'ui-icon-seek-'+n}
 						,text: false
 						,disabled: true
@@ -447,7 +455,7 @@
 				});
 
 				// prev next event
-				$(td).on('click.paginationUiDataGrid','button.ui-button',(function(self){
+				$(td).off().on('click.uiDataGridPagination','button.ui-button',(function(self){
 					return function(event) {
 
 						event.preventDefault();
@@ -475,7 +483,6 @@
 						}
 
 						return false;
-					
 					};
 				})(self));
 
@@ -533,35 +540,36 @@
 				var self = this
 					,cell = this.uiDataGridTfoot[0].rows[0].cells[0];
 
+				// cell delegate
+				$(cell).off().on('click.uiDataGridButtonCallback','button.ui-button',function(event){
+					event.preventDefault();
+					event.stopPropagation();
+					(function(data){
+						$.isFunction( data.uiDataGridToolBarButtonsClick ) && data.uiDataGridToolBarButtonsClick.call(data.uiDataGridElement,event);
+					}( $(this).data() ));
+					
+				});
+
 				// each button
-				$.map(self.options.toolBarButtons,function(b,i){
+				$.map(self.options.toolBarButtons,function(obj,idx){
 
-					(function(ui){
+					var $button = $('<button></button>',{type:'button'}).data('uiDataGridElement',self.element[0]);
 
-						if ( $.isFunction(b.fn) ) {
+					obj.text  = obj.label || obj.text;
+					obj.click = obj.fn || obj.click;
 
-							this.on('click',function(event){
+					delete obj.fn;
+					delete obj.label;
 
-								event.preventDefault();
-								event.stopPropagation();
+					if ( $.isFunction(obj.click) ) {
+						$button.data('uiDataGridToolBarButtonsClick',obj.click);
+					}
 
-								b.fn.apply(ui.element[0],arguments);
-								$(this).blur();
-
-							});
+					$button.text(obj.text).button({
+						icons: {
+							primary: (undefined === obj.icon) ? null : 'ui-icon-'+obj.icon
 						}
-						
-						// button
-						this.button({
-							icons:{
-								primary: (undefined === b.icon) ? null : 'ui-icon-'+b.icon
-							}
-						});
-						
-						// append button
-						cell.appendChild(this[0]);
-						
-					}).call( $('<button>').text(b.label),self);
+					}).appendTo(cell);
 				});
 
 				cell = self = null;
@@ -572,7 +580,7 @@
 			if ( $.isFunction(this.options.onClickRow) ) {
 
 				// delegate
-				this.uiDataGridTbody.off().on('click.tbodyUiDataGrid','tr.ui-state-hover',(function(ui) {
+				this.uiDataGridTbody.off().on('click.uiDataGridTbody','tr.ui-state-hover',(function(ui) {
 
 					return function(event) {
 
@@ -686,16 +694,16 @@
 				,success: function(json) {
 
 					if ( undefined !== json.error || 0 === json.length  ) {
-
+						
+						json = (undefined !== json.error)
+							? json.error
+							: ( json.length === 0 )
+								? this.options.emptyDataMessage
+								: 'Invalid JSON';
+								
 						if ( $.isFunction(this.options.onError) ) {
-							this.options.onError.call(this.element[0]);
+							this.options.onError.call(this.element[0],json);
 						} else {
-							json = (undefined !== json.error)
-								? json.error
-								: ( json.length === 0 )
-									? this.options.emptyDataMessage
-									: 'Invalid JSON';
-							
 							this._message(json);
 						}
 
@@ -704,6 +712,8 @@
 					
 					// create rows
 					this._createRows(json,'ajax');
+					
+					( $.isFunction(this.options.onAjaxSuccess) && this.options.onAjaxSuccess.call(this.element[0]) );
 				}
 			});
 		}
@@ -820,7 +830,6 @@
 	});
 
 	// private
-
 	var _getTemplateDataGrid = function() {
 		return '<div class="ui-datagrid-container ui-widget ui-widget-content ui-corner-all">'
 			+'<div class="ui-datagrid-title"><div class="ui-widget-header"></div></div>'
