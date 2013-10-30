@@ -4,7 +4,7 @@
  * @autor:.....: Juarez Gonçalves Nery Junior
  * @email:.....: juareznjunior@gmail.com
  * @twitter:...: @juareznjunior
- * @date.......: 2013-10-25
+ * @date.......: 2013-10-29
  * 
  * Depends:
  *	 jquery.ui.core.js
@@ -180,21 +180,46 @@
 
 			// clear
 			uiDataGridTables = contentScroll = null;
-
-			// set data-rowselected
-			this.uiDataGridTbody.data('rowselected',$([]));
 			
 			// pagination params
 			this._num_rows   = 0;
 			this._offset     = 0;
 			this._totalPages = 0;
 
+			// grid events via data bind
+			this.element.on('click.uiDataGridBindClick',':data(uiDataGridBindClick)',{uiDataGrid:this},function(event){
+
+				event.preventDefault();
+				event.stopPropagation();
+
+				var bindClick = $(this).data('uiDataGridBindClick')
+					,trigger;
+
+				if ( undefined !== bindClick ) {
+					if ( 'loadPage' !== bindClick ) {
+						trigger = event.data.uiDataGrid.options;
+						
+						$.map(bindClick.split(':'),function(a,b){
+							trigger = trigger[a];
+						});
+
+						trigger.call(event.data.uiDataGrid.element[0],this);
+					} else {
+						trigger = this.name.split('-').slice(-1);
+						if ( false === this.disabled ) {
+							$(event.data.uiDataGrid.uiDataGridTdPagination.childs).filter('button').removeClass('ui-state-hover ui-state-focus').button('disable');
+							event.data.uiDataGrid['_'+trigger+'Page']();
+							event.data.uiDataGrid.load();
+						}
+					}
+				}
+
+				bindClick = trigger = null;
+			});
+
 			// create pagination, initial config
 			// se _updatePagination()
 			this._createPagination();
-			
-			// tBodie onClickRow
-			this._tbodyEvents();
 		}
 		,_init: function() {
 			if (this.options.autoRender) {
@@ -383,12 +408,21 @@
 				row           = oTbody.insertRow(-1);
 				row.className = 'ui-state-hover';
 
-				// create row data, using current json mapper
-				$(row).data('row-json',obj);
+				
+				$(row)
+					// create row data, using current json mapper
+					.data('row-json',obj)
+					// create row data, offset index
+					.data('row-index',(offset + 1));
 			
 				// row number
 				if ( self.options.rowNumber ) {
 					$(row.insertCell(0)).addClass('ui-state-default ui-datagrid-cell-rownumber').html('<div>'+(offset + i)+'</div>');
+				}
+
+				// onClickRow
+				if ( $.isFunction(self.options.onClickRow) ) {
+					$(row).data('uiDataGridBindClick','onClickRow');
 				}
 				
 				// tds
@@ -442,49 +476,17 @@
 				// create pagination buttons
 				$.map(['first','prev','next','end'],function(n,b){
 
-					b = $('<button></button>').attr({name:'data-grid-button-'+n,type:'button'}).text(n).button({
+					b = $('<button></button>',{type:'button',name:'uiDataGridSetPage-'+n}).text(n).button({
 						icons: { primary: 'ui-icon-seek-'+n}
 						,text: false
 						,disabled: true
-					}).appendTo(td);
+					}).data('uiDataGridBindClick','loadPage').appendTo(td);
 
 					// add dom button
 					self.uiDataGridTdPagination.childs.push(b[0]);
 
 					b = null;
 				});
-
-				// prev next event
-				$(td).off().on('click.uiDataGridPagination','button.ui-button',(function(self){
-					return function(event) {
-
-						event.preventDefault();
-						event.stopPropagation();
-
-						if ( false === this.disabled ) {
-
-							var c = ['_',this.name.replace(/data-grid-button-/,''),'Page'];
-
-							// disable buttons
-							$(self.uiDataGridTdPagination.childs).filter('button').removeClass('ui-state-hover ui-state-focus').button('disable');
-
-							// call private method
-							// _nextPage
-							// _prevPage
-							// _endPage
-							// _firstPage
-							self[c.join('')]();
-
-							// load
-							self.load();
-
-							// clear
-							c = null;
-						}
-
-						return false;
-					};
-				})(self));
 
 				// show td buttons
 				td.style.visibility = 'visible';
@@ -524,7 +526,7 @@
 							$(b).text(infoPages);
 						} else {
 							// enable buttons
-							(/data-grid-button-(first|prev)/.test(b.name))
+							(/uiDataGridSetPage-(first|prev)/.test(b.name))
 								? (self._offset > 0 && b.disabled && $(b).button('enable'))
 								: (self._totalPages > currentPage && b.disabled && $(b).button('enable'));
 						}
@@ -540,20 +542,10 @@
 				var self = this
 					,cell = this.uiDataGridTfoot[0].rows[0].cells[0];
 
-				// cell delegate
-				$(cell).off().on('click.uiDataGridButtonCallback','button.ui-button',function(event){
-					event.preventDefault();
-					event.stopPropagation();
-					(function(data){
-						$.isFunction( data.uiDataGridToolBarButtonsClick ) && data.uiDataGridToolBarButtonsClick.call(data.uiDataGridElement,event);
-					}( $(this).data() ));
-					
-				});
-
 				// each button
 				$.map(self.options.toolBarButtons,function(obj,idx){
 
-					var $button = $('<button></button>',{type:'button'}).data('uiDataGridElement',self.element[0]);
+					var $button = $('<button></button>',{type:'button'});
 
 					obj.text  = obj.label || obj.text;
 					obj.click = obj.fn || obj.click;
@@ -562,7 +554,7 @@
 					delete obj.label;
 
 					if ( $.isFunction(obj.click) ) {
-						$button.data('uiDataGridToolBarButtonsClick',obj.click);
+						$button.data('uiDataGridBindClick','toolBarButtons:'+idx+':click');
 					}
 
 					$button.text(obj.text).button({
@@ -575,45 +567,10 @@
 				cell = self = null;
 			}
 		}
-		,_tbodyEvents: function() {
-				
+		,_onClickRow: function() {
 			if ( $.isFunction(this.options.onClickRow) ) {
 
-				// delegate
-				this.uiDataGridTbody.off().on('click.uiDataGridTbody','tr.ui-state-hover',(function(ui) {
-
-					return function(event) {
-
-						// highlight
-						$(this).addClass('ui-state-highlight');
-
-						// execute callback
-						// @context ui.datagrid
-						// @param row clicked
-						// @param event
-						ui.options.onClickRow.call(ui.element[0],this,event);
-
-						// remove selected row
-						(function(domTbody){
-							
-							// get clicked row
-							var rowSelected = $(domTbody).data('rowselected');
-
-							// this = clicked row
-							(event.currentTarget !== rowSelected[0] && rowSelected.removeClass('ui-state-highlight'));
-
-							// set current row clicked
-							$(domTbody).data('rowselected',$(event.currentTarget));
-							
-							// clear
-							rowSelected = null;
-
-						})(ui.uiDataGridTbody[0]);
-					};
-
-				})(this));
 			}
-
 		}
 		,_nextPage: function() {
 			this._offset += this.options.limit;
@@ -770,16 +727,8 @@
 				}).call(this.uiDataGridScrollBody[0],this);
 			}
 		}
-		,getSelectedRow: function() {
-			return this.uiDataGridTbody.data('rowselected');
-		}
-		,clearSelectedRow: function() {
-			(function(){
-				// remove highlight
-				$(this).data('rowselected').removeClass('ui-state-highlight');
-				// reset
-				$(this).data('rowselected',$([]));
-			}).call(this.uiDataGridTbody[0]);
+		,selectRow: function(row) {
+			$(row).toggleClass('ui-state-highlight');
 		}
 		,load: function() {
 			this._ajax();
