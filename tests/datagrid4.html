@@ -5,8 +5,15 @@
 		.dialog({
 			title: 'Row data'
 			,width: 500
-			,close: function() {
-				$(this).children().tabs('destroy').remove()
+			,close: function(e) {
+				$(this).children().tabs('destroy').remove();
+				e = $(this).data('datagrid');
+				
+				e.dg.datagrid('selectRow',e.row);
+				
+				e = null;
+				
+				$(this).removeData('datagrid');
 			}
 		});
 		
@@ -43,6 +50,8 @@ var dataGridJSON = {
 	,onClickRow: function(row) {
 		var l = [],d = [];
 		
+		$(this).datagrid('selectRow',row);
+		$dlg.data('datagrid',{dg:$(this),row:row});
 		$.each(row.cells,function(k,v){
 			l[l.length] = '<li><a href="#d'+k+'">td '+k+'</a></li>';
 			d[d.length] = '<div id="d'+k+'" class="ui-state-active ui-corner-all" style="margin:3px;padding:3px">'+v.innerHTML+'</div>';

@@ -33,17 +33,11 @@ var dataGridJSON = {
 	,rowNumber:true
 	,onClickRow: function() {}
 	,toolBarButtons:[{
-		label: 'Load'
+		text: 'Load'
 		,icon: 'arrowthickstop-1-s'
-		,fn: function(event) {
+		,click: function(button) {
 			$(this).datagrid('load');
-			$(event.currentTarget).trigger('mouseleave.button').button('disable');
-		}
-	},{
-		label: 'Clear Selected Row'
-		,icon: 'refresh'
-		,fn: function(){
-			$(this).datagrid('clearSelectedRow')
+			$(button).trigger('mouseleave.button').button('disable');
 		}
 	}]
 	,mapper:[{
