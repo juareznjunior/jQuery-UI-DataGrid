@@ -74,15 +74,9 @@
         ,toolBarButtons:[{
              text: 'Load'
             ,icon: 'arrowthickstop-1-s'
-            ,click: function(event) {
+            ,click: function(button) {
                 $(this).datagrid('load');
-                $(event.currentTarget).trigger('mouseleave.button').button('disable');
-            }
-        },{
-            text: 'Clear Selected Row'
-            ,icon: 'refresh'
-            ,click: function(){
-                $(this).datagrid('clearSelectedRow')
+                $(button).trigger('mouseleave.button').button('disable');
             }
         }]
         ,mapper:[{

@@ -40,7 +40,8 @@
 				,resizable: false
 				,autoOpen: false
 				,close: function() {
-					$(this).children().tabs('destroy').remove()
+					$(this).children().tabs('destroy').remove();
+                    $dgLocal.datagrid('selectRow',$(this).data('row'));
 				}
 			});
     
@@ -77,20 +78,17 @@
         ,rowNumber:true
         ,pagination: false
         ,toolBarButtons:[{
-            label: 'Load'
+            text: 'Load'
             ,icon: 'arrowthickstop-1-s'
-            ,fn: function(event) {
+            ,click: function(button) {
                 $(this).datagrid('load');
-                $(event.currentTarget).trigger('mouseleave.button').button('disable');
-            }
-        },{
-            label: 'Clear Selected Row'
-            ,icon: 'refresh'
-            ,fn: function(){
-                $(this).datagrid('clearSelectedRow')
+                $(button).trigger('mouseleave.button').button('disable');
             }
         }]
         ,onClickRow: function(row) {
+
+            $(this).datagrid('selectRow',row);
+
             var l = [],d = [];
             
             $(row.cells).each(function(k,v){
@@ -104,7 +102,8 @@
 				.height(130)
 				.tabs()
 				.end()
-				.dialog('open');
+				.dialog('open')
+                .data('row',row);
             
             l = d = null
         }
