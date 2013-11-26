@@ -41,7 +41,7 @@
 				,autoOpen: false
 				,close: function() {
 					$(this).children().tabs('destroy').remove();
-                    $dgLocal.datagrid('selectRow',$(this).data('row'));
+                    $dgLocal.datagrid('clearSelectedRows');
 				}
 			});
     
