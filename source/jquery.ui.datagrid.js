@@ -4,7 +4,7 @@
  * @autor:.....: Juarez Gonçalves Nery Junior
  * @email:.....: juareznjunior@gmail.com
  * @twitter:...: @juareznjunior
- * @date.......: 2013-10-29
+ * @date.......: 2013-11-26
  * 
  * Depends:
  *	 jquery.ui.core.js
@@ -48,12 +48,13 @@
 			,height: 200
 
 			/**
-			 * Data store
+			 * Data store and ajax config
+			 * $.ajax
+			 *  param
+			 *  url
 			 *
-			 * Ajax Request
-			 *  url and params OR
-			 *
-			 * data JSON local
+			 * Local data
+			 *  data
 			 * 
 			 */
 			,jsonStore: {
@@ -122,8 +123,11 @@
 			 * [{
 			 *    text: 'My Button Label'
 			 *   ,icon : 'arrowthickstop-1-s'
-			 *   ,click   : function(event) {}
+			 *   ,click   : function(button) {}
 			 * }]
+			 *
+			 * click context: ui.datagrid
+			 * click param: buttton
 			 *
 			 */
 			,toolBarButtons: false
@@ -178,6 +182,9 @@
 				childs: []
 			};
 
+			// selected Row(s)
+			this._selectedRows = [];
+
 			// clear
 			uiDataGridTables = contentScroll = null;
 			
@@ -218,7 +225,7 @@
 			});
 
 			// create pagination, initial config
-			// se _updatePagination()
+			// see _updatePagination()
 			this._createPagination();
 		}
 		,_init: function() {
@@ -280,11 +287,9 @@
 				auxTh = auxTh.text(auxTh.text());
 				
 				// align
-				if ( /left|right|center/.test(obj.align) ) {
-					$(auxTh[0]).data('text-align',al+obj.align).addClass(al+obj.align);
-				} else {
-					$(auxTh[0]).data('text-align',al+'left').addClass(al+'left');
-				}
+				$(auxTh[0]).data('text-align',al+(( /left|right|center/.test(obj.align) ) ? obj.align : 'left')).addClass(function(){
+					return $(this).data('textAlign');
+				});
 
 				// width
 				if ( undefined !== obj.width ) {
@@ -567,11 +572,6 @@
 				cell = self = null;
 			}
 		}
-		,_onClickRow: function() {
-			if ( $.isFunction(this.options.onClickRow) ) {
-
-			}
-		}
 		,_nextPage: function() {
 			this._offset += this.options.limit;
 		}
@@ -605,6 +605,9 @@
 				,offset = this._offset
 				,store  = o.jsonStore;
 			
+			// clear selected rows
+			this.clearSelectedRows();
+
 			// local data
 			if ( undefined === url || '' === url ) {
 
@@ -728,7 +731,25 @@
 			}
 		}
 		,selectRow: function(row) {
-			$(row).toggleClass('ui-state-highlight');
+			var self = this
+				,idx= $.inArray(row,this._selectedRows);
+				
+			if ( idx > -1 ) {
+				this._selectedRows.splice(idx,1);
+				$(row).removeClass('ui-state-highlight');
+			} else {
+				this._selectedRows.push(row);
+				$(row).addClass('ui-state-highlight');
+			}
+
+			self = null;
+		}
+		,clearSelectedRows: function() {
+			this.getSelectedRows(true).removeClass('ui-state-highlight');
+			this._selectedRows = [];
+		}
+		,getSelectedRows: function(obj) {
+			return ( true === obj ) ? $(this._selectedRows) : this._selectedRows;
 		}
 		,load: function() {
 			this._ajax();
@@ -824,5 +845,5 @@
 			+'</div>'
 		+'</div>';
 	};
-	
+
 }(jQuery,window,document));
