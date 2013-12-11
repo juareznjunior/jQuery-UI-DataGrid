@@ -4,7 +4,7 @@
  * @autor:.....: Juarez Gonçalves Nery Junior
  * @email:.....: juareznjunior@gmail.com
  * @twitter:...: @juareznjunior
- * @date.......: 2013-11-26
+ * @date.......: 2013-12-11
  * 
  * Depends:
  *	 jquery.ui.core.js
@@ -199,24 +199,26 @@
 				event.preventDefault();
 				event.stopPropagation();
 
-				var bindClick = $(this).data('uiDataGridBindClick')
+				var bindClick = $.data(this,'uiDataGridBindClick')
 					,trigger;
 
 				if ( undefined !== bindClick ) {
-					if ( 'loadPage' !== bindClick ) {
+					if ( 'loadPage' === bindClick ) {
+						trigger = this.name.split('-').slice(-1);
+						if ( false === this.disabled ) {
+							$(event.data.uiDataGrid.uiDataGridTdPagination.childs).filter('button').removeClass('ui-state-hover ui-state-focus').button('disable');
+							event.data.uiDataGrid['_'+trigger+'Page']();
+							event.data.uiDataGrid.load();
+						}
+					} else {
 						trigger = event.data.uiDataGrid.options;
 						
 						$.map(bindClick.split(':'),function(a,b){
 							trigger = trigger[a];
 						});
 
-						trigger.call(event.data.uiDataGrid.element[0],this);
-					} else {
-						trigger = this.name.split('-').slice(-1);
-						if ( false === this.disabled ) {
-							$(event.data.uiDataGrid.uiDataGridTdPagination.childs).filter('button').removeClass('ui-state-hover ui-state-focus').button('disable');
-							event.data.uiDataGrid['_'+trigger+'Page']();
-							event.data.uiDataGrid.load();
+						if ( $.isFunction(trigger) ) {
+							trigger.call(event.data.uiDataGrid.element[0],this);
 						}
 					}
 				}
@@ -264,61 +266,58 @@
 		}
 		,_createColumns: function() {
 
-			var self        = this
-				,auxTh      = null
-				,row        = []
-				,cols       = []
-				,text       = null
-				,w          = 0
-				,sw         = 0
-				,col        = '<col></col>'
-				,th         = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
-				,al         = 'ui-datagrid-align-'
-				,ch         = 'ui-datagrid-column-hide';
+			var self   = this
+				,$auxTh = null
+				,cells  = []
+				,cols   = []
+				,text   = null
+				,sw     = 0
+				,col    = '<col></col>'
+				,th     = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
+				,al     = 'ui-datagrid-align-'
+				,ch     = 'ui-datagrid-column-hide';
 			
 			// each mapper
 			$.map(self.options.mapper,function(obj,index){
 			
 				text = obj.title || obj.name;
-				w    = 10;
+				sw += obj.width || 0;
 
 				// remove tags
-				auxTh = $(th).html(text);
-				auxTh = auxTh.text(auxTh.text());
+				$auxTh = $(th).html(text);
+				$auxTh = $auxTh.text($auxTh.text());
 				
 				// align
-				$(auxTh[0]).data('text-align',al+(( /left|right|center/.test(obj.align) ) ? obj.align : 'left')).addClass(function(){
+				$auxTh.data('text-align',al+(( /left|right|center/.test(obj.align) ) ? obj.align : 'left')).addClass(function(){
 					return $(this).data('textAlign');
 				});
 
-				// width
-				if ( undefined !== obj.width ) {
-					w = obj.width;
+				if ( undefined !== obj.sort ) {
+					$auxTh
+						.addClass('ui-datagrid-sort')
+						.html(function(){
+							return $('<button>'+this.innerHTML+'</button>')
+								.button({icons:{primary:'',secondary:'ui-icon-carat-2-n-s'}});
+						});
 				}
-				
+
 				// append
-				cols[cols.length] = $(col).width(w)[0];
-				row[row.length] = auxTh[0];
+				cols[cols.length]   = $(col).width(obj.width);
+				cells[cells.length] = $auxTh[0];
 
 				// hide column
 				if ( undefined !== obj.hidden ) {
-					$(auxTh[0]).data('hidden',ch).addClass(ch);
+					$auxTh.data('hidden',ch).addClass(ch);
 					$(cols).last().addClass(ch);
-				}
+				};
 
-				sw += w;
 			});
 
 			// enable row number
 			if (self.options.rowNumber) {
-				cols.splice(0,0,$(col).width(20)[0]);
-				row.splice(0,0,$('<th class="ui-state-default ui-datagrid-cell-rownumber" role="columnheader"><div></div></th>')[0]);
+				cols.splice(0,0,$(col)[0]);
+				cells.splice(0,0,$('<th class="ui-state-default ui-datagrid-cell-rownumber" role="columnheader"></th>')[0]);
 				sw += 20;
-			}
-
-			// enable overflow-y
-			if ( sw > self.element.width() ) {
-				self.uiDataGridScrollMain.width(sw);
 			}
 
 			// create colgroup cols
@@ -329,14 +328,19 @@
 			// create thead ths
 			$([self.uiDataGridThead[0].rows[0],self.uiDataGridTheadBody[0].rows[0]])
 				.empty() // update
-				.append(row);
+				.append(cells);
 
 			// correct column width
 			$(self.uiDataGridThead[0].rows[0].cells).slice(0,-1).map(function(i,w){
-				w = $(w).outerWidth();
+				w = Math.max($(w).innerWidth(),$(w).outerWidth());
 				self.uiDataGridColGroup1.children().eq(i).width(w);
 				self.uiDataGridColGroup2.children().eq(i).width(w);
 			});
+
+			// enable overflow-y
+			if ( sw > self.element.width() ) {
+				self.uiDataGridScrollMain.width(sw);
+			}
 
 			// grid layout
 			$(self.uiDataGridTbody[0].parentNode).map(function(i,t){
@@ -347,12 +351,12 @@
 
 				// clone table
 				t = $(t)
-						.clone()
-						.addClass('ui-datagrid-gridlayout')
-						.find('tbody')
-						.append('<tr><td class="ui-widget ui-widget-content">&nbsp;'+Array(t.tHead.rows[0].cells.length).join('</td><td class="ui-widget ui-widget-content">&nbsp;')+'</td></tr>')
-						.end()
-						.appendTo(t.parentNode);
+					.clone()
+					.addClass('ui-datagrid-gridlayout')
+					.find('tbody')
+					.append('<tr><td class="ui-widget ui-widget-content">&nbsp;'+Array(t.tHead.rows[0].cells.length).join('</td><td class="ui-widget ui-widget-content">&nbsp;')+'</td></tr>')
+					.end()
+					.appendTo(t.parentNode);
 
 				$(t[0].tHead).remove();
 
@@ -367,7 +371,7 @@
 
 			$(self.uiDataGridTheadBody[0].parentNode.tHead).hide();
 			
-			row = auxTh = self = col = cols = th = al = null;
+			cells = $auxTh = self = col = cols = th = al = null;
 		}
 		,_createRows: function(json,origin,appendRow) {
 
@@ -422,7 +426,7 @@
 			
 				// row number
 				if ( self.options.rowNumber ) {
-					$(row.insertCell(0)).addClass('ui-state-default ui-datagrid-cell-rownumber').html('<div>'+(offset + i)+'</div>');
+					$(row.insertCell(0)).addClass('ui-state-default ui-datagrid-cell-rownumber').text((offset + i));
 				}
 
 				// onClickRow
@@ -715,7 +719,7 @@
 						return function(){
 							ui.options.onComplete.call(ui.element[0]);
 						};
-					}(self)),(delay+1));
+					}(self)),(delay++));
 				}
 			}
 
