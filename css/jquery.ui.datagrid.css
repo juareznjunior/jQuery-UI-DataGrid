@@ -1,18 +1,18 @@
 .ui-datagrid-content {overflow: auto;overflow-y:hidden;margin:0;padding:0;}
 .ui-widget .ui-datagrid-title {border:0}
 .ui-datagrid-title .ui-widget-header {padding:4px;border:0;text-align:center;}
-.ui-datagrid-container table {width:100%;border:0 !important;border-spacing:0;border-collapse: separate}
+.ui-datagrid-container table {width:100%;border:0 !important;border-spacing:0;border-collapse: separate;table-layout: fixed}
 .ui-datagrid-container .ui-datagrid-tools .ui-button[disabled] { border-color: transparent}
-.ui-datagrid-container th,.ui-datagrid-container td {margin:0;padding:0;border-width: 0 1px 0 0 !important;}
+.ui-datagrid-container th,.ui-datagrid-container td {margin:0;padding:0;border-width: 0 1px 0 0 !important;overflow: hidden;text-overflow: ellipsis}
 .ui-datagrid-header {border-width: 0  0  1px 0 !important;}
-.ui-datagrid-header .ui-state-default,.ui-datagrid-body .ui-state-default,.ui-datagrid-body .ui-widget-content {padding: 3px}
+.ui-datagrid-header .ui-state-default,.ui-datagrid-body .ui-state-default,.ui-datagrid-body .ui-widget-content {padding: 3px; vertical-align: middle;}
 .ui-datagrid-header > table > thead > tr > th:last-child {width: 17px}
 .ui-datagrid-body {height:200px;overflow:scroll;overflow-x:hidden;border:0;position:relative}
 .ui-datagrid-body > table {position:absolute;z-index:20;top:0}
-.ui-datagrid-body > table:last-child {z-index:19;height:100%;}
+.ui-datagrid-body > table.ui-datagrid-gridlayout {z-index:19;height:100%;}
 .ui-datagrid-body .ui-state-hover ,.ui-datagrid-body .ui-state-highlight {border:0}
 .ui-datagrid-body tr.ui-state-hover {cursor:default !important}
-.ui-datagrid-body td {font-weight:normal;overflow: hidden;}
+.ui-datagrid-body td {font-weight:normal }
 .ui-datagrid-body tr.ui-state-hover:hover td.ui-widget-content, .ui-datagrid-body tr.ui-state-highlight td.ui-widget-content {background:none;color:inherit !important;}
 .ui-datagrid-body td .ui-button { border-width: 1px;padding:0}
 .ui-datagrid-body td.ui-state-error { border-width: 1px !important}
@@ -20,9 +20,17 @@
 .ui-datagrid-tools td {padding: 3px 1px}
 .ui-datagrid-tools td:last-child {text-align:right}
 .ui-datagrid-tools td:last-child .ui-button-icon-only .ui-button-text ,.ui-datagrid-tools td:last-child .ui-button-icons-only .ui-button-text { padding:1px}
-.ui-datagrid-cell-rownumber {width:20px}
+.ui-datagrid-cell-rownumber { width:20px;text-align: center }
 .ui-datagrid-cell-rownumber div {text-align:center;width:20px;overflow:hidden;white-space: nowrap;}
 .ui-datagrid-gridlayout .ui-datagrid-cell-rownumber {background-image: none}
 .ui-datagrid-header th.ui-datagrid-align-center, .ui-datagrid-body td.ui-datagrid-align-center {text-align:center}
 .ui-datagrid-header th.ui-datagrid-align-left, .ui-datagrid-body td.ui-datagrid-align-left {text-align:left}
 .ui-datagrid-header th.ui-datagrid-align-right, .ui-datagrid-body td.ui-datagrid-align-right {text-align:right}
+.ui-datagrid-column-hide { display: none}
+/* sort config */
+th.ui-state-default.ui-datagrid-sort > .ui-button {  width:100%;background: none repeat scroll 0 0 transparent !important; border: medium none !important; box-shadow: none !important; margin: 0; padding: 0;text-align: inherit}
+th.ui-state-default.ui-datagrid-sort > .ui-button > span.ui-button-text {font-weight: bold; padding-top:0; padding-bottom:0; padding-left:0; margin-top: -2px;}
+/* tablesorter jquery plugin */
+th.ui-state-default.ui-datagrid-sort.tablesorter-header.tablesorter-headerAsc > .ui-button > span.ui-button-icon-secondary { background-position: -64px 0 }
+th.ui-state-default.ui-datagrid-sort.tablesorter-header > .ui-button > span.ui-button-icon-secondary
+,th.ui-state-default.ui-datagrid-sort.tablesorter-header.tablesorter-headerDesc > .ui-button > span.ui-button-icon-secondary { background-position: 0 0 }

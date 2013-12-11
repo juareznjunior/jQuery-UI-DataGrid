@@ -28,46 +28,33 @@ var dataGridJSON = {
 	}             
 	,title: 'jQuery UI DataGrid - Using title and row number - jquery.tablesorter Plugin'
 	,pagination: false
-	,rowNumber: true
 	,onComplete: function() {
-		var $dg = $(this)
-			,$body = $dg.datagrid('getTbody');
-		
-		// apply tablesorter
-		$body.parent().tablesorter();
-		
-		// thead delegate
-		$dg.datagrid('getThead').on('click','th',(function(bodyTheadRow){
-			
-			return function() {
-				
-				if ( $(this).hasClass('ui-datagrid-cell-rownumber') ) {
-					return;
-				}
-				
-				var $this = $(this)
-					,$parent = $this.parent()
-					,$active = $.data($parent[0],'active');
-					
-				if (undefined !== $active && $active[0] !== this ) {
-					$active.removeClass('ui-state-highlight');
-				}
-				
-				$( bodyTheadRow.cells[this.cellIndex] ).trigger('click').each(function(){
-					$.data($parent[0],'active',$this.addClass('ui-state-highlight'));
-				});
-				
-				$this = $parent = $active;
-			}
-			
-		}( $body.prev()[0].rows[0] )));
-		
-		$body = $dg = null;
+		var $config = $(this)
+		 .datagrid('getTbody')
+		 .parent() // table
+		 .tablesorter()
+		 .end();
+
+		var cache = null;
+
+		$(this).datagrid('getThead').on('mouseup','th.ui-datagrid-sort',{thead:$config.prev()[0]},function(e){
+		 e = $( $(e.data.thead.rows[0].cells[this.cellIndex]).trigger('sort.tablesorter')[0].className.split(' ')).filter(function(index,val){
+		     return /tablesorter/.test(val) ? val : null;
+		 }).get().join(' ');
+
+		 $( cache === null ? this : [cache,this] )
+		     .removeClass('tablesorter-header')
+		     .removeClass('tablesorter-headerAsc')
+		     .removeClass('tablesorter-headerDesc');
+		 cache = $(this).addClass(e)[0];
+
+		 e = null;
+		});
 	}
 	,mapper:[{
-		name: 'id',title:'Código',width:50,align:'center'
+		name: 'id',title:'Código',width:120,align:'center',sort: true
 	},{
-		name: 'nome',title:'Nome',width:200,align:'left'
+		name: 'nome',title:'Nome',width:200,align:'left',sort: true
 	},{
 		name: 'empresa',title:'Empresa',align:'left'
 	}]
