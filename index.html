@@ -5,47 +5,35 @@
 <title>juareznjunior/jQuery-UI-DataGrid @ GitHub</title>
 <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css" />
 <link href="css/jquery.ui.datagrid.css" rel="stylesheet" type="text/css" />
-<link href="css/jquery.syntax.core.css" rel="stylesheet" type="text/css" />
-<link href="css/jquery.syntax.layout.list.css" rel="stylesheet" type="text/css" />
+<link href="https://raw.github.com/ccampbell/rainbow/master/themes/paraiso-dark.css" rel="stylesheet" type="text/css" />
 <style type="text/css">
-body {
-    margin: 0;
-    outline: medium none;
-    padding: 0 !important;
-	border: 0  !important;
-}
-h1 {
-	border-width: 0 0 1px 0 !important;
-	font-size: 1em !important;
-}
+body { margin: 0; outline: medium none; padding: 0 !important; border: 0  !important;}
+h1 { border-width: 0 0 1px 0 !important; font-size: 1em !important;}
 h1.ui-widget-content { background: none; }
 #header { width: 900px;padding:10px 0; text-align:center;margin: 10px auto 0 auto;}
-#container {
-	margin: 0 auto;
-	width: 900px;
-	position: relative
-}
-
+#container { margin: 0 auto; width: 900px; position: relative}
 #container.xhidden {visibility: hidden}
-
 .ui-widget {font-size: 1em }
 .example > button { margin-bottom: 10px}
-.example:last-child {margin-bottom:20px};
-
+.example:last-child {margin-bottom:20px}
+.ui-dialog { padding: 0.1em; position: fixed; border-width:0;-moz-box-shadow:0 2px 25px #000;-webkit-box-shadow:0 2px 25px #000;box-shadow:0 2px 25px #000}
+.ui-dialog .ui-dialog-content {padding:0 !important;}
+.ui-dialog-content .ui-container-table {padding: 1px 0;}
+.ui-dialog-content table.ui-widget-content {border:0}
 .ui-dialog .ui-dialog-title {font-weight:bold}
-.ui-dialog .ui-dialog-titlebar { padding: 0.2em 1em;}
+.ui-widget-header.ui-corner-all { border-radius: 2px 2px 0 0;}
 .ui-dialog .ui-dialog-content .ui-widget-form {-moz-box-shadow:none;-webkit-box-shadow:none;box-shadow:none}
-.ui-dialog {border-width:0;-moz-box-shadow:0 2px 25px #000;-webkit-box-shadow:0 2px 25px #000;box-shadow:0 2px 25px #000}
-.ui-dialog .ui-dialog-buttonpane { padding: 0; border:0}
-
+.ui-autocomplete {-moz-box-shadow:0px 2px 8px #000;-webkit-box-shadow:0px 2px 8px #000;box-shadow:0px 2px 8px #000}
+.ui-tabs .ui-tabs-panel {padding:.5em}
+.ui-tabs .ui-tabs-nav li { text-shadow: none}
+.ui-dialog-content .ui-tabs-panel {padding:0.1em 0 0;border-width: 0 !important;}
 .ui-button-icon-only .ui-button-text, .ui-button-icons-only .ui-button-text { padding: .3em; text-indent: -9999999px; }
-.ui-button-text-icon-primary .ui-button-text, .ui-button-text-icons .ui-button-text { padding: 0.2em 1em 0.2em 2.1em }
-.ui-button-text-icon-secondary .ui-button-text, .ui-button-text-icons .ui-button-text { padding: .2em 2.1em .2em 1em; }
+.ui-button-text-icon-primary .ui-button-text, .ui-button-text-icons .ui-button-text { padding: .2em 1em .25em 2.1em }
+.ui-button-text-icon-secondary .ui-button-text, .ui-button-text-icons .ui-button-text { padding: .2em 2.1em .2em 1em }
 .ui-button-text-icons .ui-button-text { padding-left: 2.1em; padding-right: 2.1em; }
 .ui-button-text-only .ui-button-text {padding:0.3em 1em}
-input.ui-button { padding: .3em 1em}
 .ui-button::-moz-focus-inner{border: 1px dotted transparent}
-
+.ui-dialog .ui-button.ui-dialog-titlebar-close { border: medium none; border-radius: 10px;}
 .ui-corner-tl { -moz-border-radius-topleft: 2px; -webkit-border-top-left-radius: 2px; border-top-left-radius: 2px; }
 .ui-corner-tr { -moz-border-radius-topright: 2px; -webkit-border-top-right-radius: 2px; border-top-right-radius: 2px; }
 .ui-corner-bl { -moz-border-radius-bottomleft: 2px; -webkit-border-bottom-left-radius: 2px; border-bottom-left-radius: 2px; }
@@ -58,12 +46,6 @@ input.ui-button { padding: .3em 1em}
 
 tr.foo-bar-xyz td {
 	background: yellow !important
-}
-.ui-dialog { position: fixed }
-.ui-dialog-content { padding: 1px 0 0 0 !important; overflow-x: hidden}
-
-.syntax-theme-base .syntax {
-   font-size: 11px;
 }
 
 #example2 thead th {
@@ -131,11 +113,12 @@ body.overflow-hidden {
 		<button data-source="datagrid9.html">load</button><div id="datagrid9"></div>
 	</div>
 </div>
-<div id="dialog-source"></div>
+<div id="dialog-source"><pre><code data-language="javascript"></code></pre></div>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
 <script src="jquery.tablesorter.min.js"></script>
 <script src="minified/jquery.ui.datagrid.min.js"></script>
+<script src="rainbow.min.js"></script>
 <script src="demo.js"></script>
 </body>
 </html>

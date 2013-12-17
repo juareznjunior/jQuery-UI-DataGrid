@@ -7,16 +7,36 @@
 		,modal: true
 		,autoOpen: false
 	});
+
+	// https://gist.github.com/cowboy/3749767
+	var Stringify = function(obj) {
+	  var placeholder = '____PLACEHOLDER____';
+	  var fns = [];
+	  var json = JSON.stringify(obj, function(key, value) {
+	    if (typeof value === 'function') {
+	      fns.push(value);
+	      return placeholder;
+	    }
+	    return value;
+	  }, 2);
+	  json = json.replace(new RegExp('"' + placeholder + '"', 'g'), function(_) {
+	    return fns.shift();
+	  });
+	  return json;
+	};
+
+	// current timestamp
+	var now = (new Date()).getTime();
 	
 	// injectJs
-	var injectJs = function( oldObj,callback) {
-		var script = doc.createElement( 'script' )
+	var injectJs = function(oldObj,callback) {
+		var script = doc.createElement('script')
 			,src
 			,isFileReady = function( readyState ) {	
 				return ( ! readyState || readyState == 'loaded' || readyState == 'complete' );
 			};
 
-		script.src = 'tests/'+oldObj+'?ts='+(new Date()).getTime();
+		script.src = 'tests/'+oldObj+'?ts='+now;
 
 		script.onreadystatechange = script.onload = function () {
 
@@ -33,7 +53,7 @@
 				}).addClass('button-view-source'));
 			}
 			
-			$.data(c[0],'src','tests/highlight/'+oldObj);
+			$.data(c[0],'src','tests/'+oldObj);
 			c = null;
 
 			$(doc.body).find('script').last().remove();
@@ -45,22 +65,15 @@
 	,$dlgSource
 	,viewSource = function(dg) {
 		
-		if (dg === $.data($dlgSource[0],'active')) {
+		if ( dg === $.data($dlgSource[0],'active') ) {
 			$dlgSource.dialog('open');
 			return;
 		}
 		
 		$dlgSource
-			.text('Loading...')
 			.dialog('option','title','#'+dg.id+' datagrid source')
+			.data('active',dg)
 			.dialog('open');
-		
-		$.get($.data(dg,'src'),function(data){
-			$dlgSource
-				.data('active',dg)
-				.html('<div class="syntax-container syntax-theme-base">'+data+'</div>')
-				
-		});
 	}
 
 	// create datagrid using jquery.ui.dialog and jquery.ui.tabs
@@ -74,9 +87,7 @@
 				,autoOpen: true
 				,open: function() {
 					setTimeout(function(){
-						d
-							.dialog('option','title',' Example 7 - Using jQuery UI Dialog')
-							.datagrid('load')
+						d.dialog('option','title',' Example 7 - Using jQuery UI Dialog').datagrid('load');
 					},1000)
 				}
 				,buttons: {
@@ -97,7 +108,7 @@
 				if ( undefined === $(panel).data('tabs-load') ) {
 
 					var dataGridJSON = $(self).data('dataGridJSON');
-					dataGridJSON.title = 'DataGrid '+$(tab).text()
+					dataGridJSON.title = 'DataGrid '+$(tab).text();
 
 					$(panel)
 						.empty()
@@ -182,7 +193,7 @@
 			}));
 	});
 	
-	//
+	// view source
 	$(doc.body).on('click','button.button-view-source',function(){
 		viewSource($(this).next()[0]);
 	})
@@ -191,6 +202,9 @@
 	$dlgSource = $('#dialog-source').dialog({
 		width: 800
 		,height: 600
+		,open: function() {
+			$dlgSource.find('code').html(Stringify(dataGridJSON));
+		}
 	});
 	
 }(jQuery,document));
