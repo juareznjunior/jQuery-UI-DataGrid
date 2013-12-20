@@ -29,7 +29,7 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
 <script type="text/javascript" src="https://raw.github.com/Mottie/tablesorter/master/js/jquery.tablesorter.min.js"></script>
-<script type="text/javascript" src="../minified/jquery.ui.datagrid.min.js"></script>
+<script type="text/javascript" src="../source/jquery.datagrid.js"></script>
 <script>
 (function($){
     var $dgLocal = $('#data-grid-local')
@@ -63,6 +63,7 @@
             ]}
         }
         ,pagination:false
+        ,title: 'Simple Grid, using tablesorter jquery plugin'
         ,mapper:[{
             name: 'id',title:'Código',width:120,align:'center',sort: true
         },{
@@ -92,8 +93,15 @@
 
                 e = null;
             });
-
         }
+        ,toolBarButtons:[{
+            text: 'Change Title'
+            ,click: function(btn) {
+                btn = $(this).datagrid('option','title',(new Date()).getTime());
+                console.log( btn.datagrid('option','title') )
+
+            }
+        }]
     })
     
 })(jQuery)
