@@ -1,0 +1,10 @@
+{
+  "vars": {},
+  "css": [
+    "tables.less",
+    "buttons.less",
+    "glyphicons.less",
+    "panels.less"
+  ],
+  "js": []
+}
