@@ -1,26 +1,23 @@
 /*!
- * jQuery UI datagrid
+ * jQuery datagrid
  * 
  * @autor:.....: Juarez Gonçalves Nery Junior
  * @email:.....: juareznjunior@gmail.com
  * @twitter:...: @juareznjunior
- * @date.......: 2013-12-11
+ * @date.......: 2014-01-29
  * 
- * Depends:
+ * Use jQueryUI - Depends:
  *	 jquery.ui.core.js
  *	 jquery.ui.widget.js
  *	 jquery.ui.button.js
+ * 
  */
 ;(function($,window,document,undefined) {
 
 	'use strict';
 
-	var JQUERY_UI_VERSION = Number($.ui.version.replace(/[^0-9]/g,''));
-
-	// plugin
-	$.widget('ui.datagrid', {
-
-		options: {
+	var jQueryDataGrid = {
+		options : {
 
 			/**
 			 * limit clause
@@ -143,7 +140,7 @@
 			var uiDataGridTables = [],contentScroll;
 			
 			// container datagrid
-			this.uiDataGrid = $(_getTemplateDataGrid());
+			this.uiDataGrid = $(getTemplateDataGrid( (undefined !== this.options.ui) ? 'ui' : 'bs' ));
 			
 			// tables in container
 			this.uiDataGrid.find('table').filter(function(){
@@ -172,6 +169,7 @@
 			this.uiDataGridColGroup1  = this.uiDataGridThead.prev();
 			this.uiDataGridColGroup2  = this.uiDataGridTheadBody.prev();
 			this.uiDataGridTbody      = $(uiDataGridTables[1].tBodies[0]);
+			this.uiDataGridMsgError   = $(uiDataGridTables[1]).parent().find('div.ui-state-error');
 			this.uiDataGridTfoot      = (this.options.pagination || $.isArray(this.options.toolBarButtons)) ? $(uiDataGridTables[2].tBodies[0]) : $([]);
 			this.uiDataGridScrollBody = $(uiDataGridTables[1].parentNode).height(this.options.height);
 			this.uiDataGridScrollMain = $(contentScroll);
@@ -204,9 +202,17 @@
 
 				if ( undefined !== bindClick ) {
 					if ( 'loadPage' === bindClick ) {
-						trigger = this.name.split('-').slice(-1);
+						
 						if ( false === this.disabled ) {
-							$(event.data.uiDataGrid.uiDataGridTdPagination.childs).filter('button').removeClass('ui-state-hover ui-state-focus').button('disable');
+							trigger = $(event.data.uiDataGrid.uiDataGridTdPagination.childs).filter('button');
+
+							if ( event.data.uiDataGrid.options.ui ) {
+								trigger.removeClass('ui-state-hover ui-state-focus').button('disable');
+							} else {
+								trigger.prop('disabled',true);
+							}
+							
+							trigger = this.name.split('-').slice(-1);
 							event.data.uiDataGrid['_'+trigger+'Page']();
 							event.data.uiDataGrid.load();
 						}
@@ -230,27 +236,11 @@
 			// see _updatePagination()
 			this._createPagination();
 		}
+
 		,_init: function() {
 			if (this.options.autoRender) {
 				this.render();
 			}
-		}
-		,_setOption: function(option,value) {
-			if ( 'jsonStore' === option && $.isPlainObject(value) ) {
-				this.options.jsonStore = $.extend({},this.options.jsonStore,value);
-			} else {
-				( JQUERY_UI_VERSION >= 1.9 )
-					? this._super(option,value)
-					: $.Widget.prototype._setOption.apply(this,arguments);
-			}
-		}
-		,_destroy: function() {
-
-			if ( JQUERY_UI_VERSION < 1.9 ) {
-				$.Widget.prototype.destroy.call(this);
-			}
-
-			this.element.empty();
 		}
 		,_createColumns: function() {
 
@@ -263,7 +253,8 @@
 				,col    = '<col></col>'
 				,th     = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
 				,al     = 'ui-datagrid-align-'
-				,ch     = 'ui-datagrid-column-hide';
+				,ch     = 'ui-datagrid-column-hide'
+				,ui     = self.options.ui;
 			
 			// each mapper
 			$.map(self.options.mapper,function(obj,index){
@@ -280,12 +271,17 @@
 					return $(this).data('textAlign');
 				});
 
-				if ( undefined !== obj.sort ) {
+				if ( true === obj.sort ) {
 					$auxTh
 						.addClass('ui-datagrid-sort')
-						.html(function(){
-							return $('<button>'+this.innerHTML+'</button>',{type:'button'})
-								.button({icons:{primary:'',secondary:'ui-icon-carat-2-n-s'}});
+						.html(function(b){
+							b = $('<button>'+this.innerHTML+'</button>',{type:'button'});
+							if ( ui ) {
+								b.button({icons:{primary:'',secondary:'ui-icon-carat-2-n-s'}});
+							} else {
+								b.addClass('btn btn-default').append('<span class="glyphicon glyphicon-sort"></span>');
+							}
+							return b;
 						});
 				}
 
@@ -341,10 +337,11 @@
 				t = $(t)
 					.clone()
 					.addClass('ui-datagrid-gridlayout')
+					.removeClass('table-hover')
 					.find('tbody')
 					.append('<tr><td class="ui-widget ui-widget-content">&nbsp;'+Array(t.tHead.rows[0].cells.length).join('</td><td class="ui-widget ui-widget-content">&nbsp;')+'</td></tr>')
 					.end()
-					.appendTo(t.parentNode);
+					.prependTo(t.parentNode);
 
 				$(t[0].tHead).remove();
 
@@ -369,6 +366,7 @@
 				,cls             = 'ui-widget ui-widget-content'
 				,offset          = appendRow ? (oTbody.rows.length + 1) : (self._offset + 1)
 				,localPagination = (!appendRow && 'local' === origin && self.options.pagination)
+				,ui              = self.options.ui
 				,row
 				,cell;
 
@@ -403,7 +401,7 @@
 			
 				// tr
 				row           = oTbody.insertRow(-1);
-				row.className = 'ui-state-hover';
+				row.className = ui ? 'ui-state-hover' : '';
 
 				
 				$(row)
@@ -465,7 +463,10 @@
 			if ( true === this.options.pagination ) {
 
 				var self = this
-					,td = $(this.uiDataGridTfoot[0].rows[0].cells).last()[0];
+					,td = $(this.uiDataGridTfoot[0].rows[0].cells).last()[0]
+					,ui = self.options.ui
+					,bsicons = ['step-backward','backward','forward','step-forward']
+					,i;
 
 				// add dom span
 				self.uiDataGridTdPagination.childs.push($(td).children()[0]);
@@ -473,11 +474,20 @@
 				// create pagination buttons
 				$.map(['first','prev','next','end'],function(n,b){
 
-					b = $('<button></button>',{type:'button',name:'uiDataGridSetPage-'+n}).text(n).button({
-						icons: { primary: 'ui-icon-seek-'+n}
-						,text: false
-						,disabled: true
-					}).data('uiDataGridBindClick','loadPage').appendTo(td);
+					i = b;
+
+					b = $('<button></button>',{type:'button',name:'uiDataGridSetPage-'+n,disabled:true}).text(n);
+
+					if ( ui ) {
+						b.button({
+							icons: { primary: 'ui-icon-seek-'+n}
+							,text: false
+						});
+					} else {
+						b.addClass('btn btn-default btn-xs').html('<span class="glyphicon glyphicon-'+bsicons[i]+'"></span>');
+					}
+
+					b.data('uiDataGridBindClick','loadPage').appendTo(td);
 
 					// add dom button
 					self.uiDataGridTdPagination.childs.push(b[0]);
@@ -485,10 +495,7 @@
 					b = null;
 				});
 
-				// show td buttons
-				td.style.visibility = 'visible';
-
-				self = td = null;
+				self = td = bsicons = null;
 			}
 
 		}
@@ -501,7 +508,7 @@
 			// using keys num_rows and rows
 			// {"num_rows": number,rows:[{"foo":"bar","date":date},{"foo":"bar","date":date}]}
 			//
-			// using num_rows mapper
+			// using num_rows within mapper
 			// [{"num_rows":number,"foo":"bar","date":date}]
 			//
 			// disable pagination via request
@@ -523,9 +530,9 @@
 							$(b).text(infoPages);
 						} else {
 							// enable buttons
-							(/uiDataGridSetPage-(first|prev)/.test(b.name))
-								? (self._offset > 0 && b.disabled && $(b).button('enable'))
-								: (self._totalPages > currentPage && b.disabled && $(b).button('enable'));
+							( /uiDataGridSetPage-(first|prev)/.test(b.name) )
+								? (self._offset > 0 && b.disabled && (self.options.ui ? $(b).button('enable') : $(b).prop('disabled',false)) )
+								: (self._totalPages > currentPage && (self.options.ui ? $(b).button('enable') : $(b).prop('disabled',false)) );
 						}
 					});
 				}(this));
@@ -537,7 +544,8 @@
 
 				// cell to append btns
 				var self = this
-					,cell = this.uiDataGridTfoot[0].rows[0].cells[0];
+					,cell = this.uiDataGridTfoot[0].rows[0].cells[0]
+					,ui = self.options.ui;
 
 				// each button
 				$.map(self.options.toolBarButtons,function(obj,idx){
@@ -554,11 +562,22 @@
 						$button.data('uiDataGridBindClick','toolBarButtons:'+idx+':click');
 					}
 
-					$button.text(obj.text).button({
-						icons: {
-							primary: (undefined === obj.icon) ? null : 'ui-icon-'+obj.icon
+					$button.text(obj.text);
+
+					if ( ui ) {
+						$button.button({
+							icons: {
+								primary: (undefined === obj.icon) ? null : 'ui-icon-'+obj.icon
+							}
+						});
+					} else {
+						$button.addClass('btn btn-default btn-xs');
+						if ( undefined !== obj.icon ) {
+							$button.prepend('<span class="glyphicon glyphicon-'+obj.icon+'"></span> ');
 						}
-					}).appendTo(cell);
+					}
+
+					$button.appendTo(cell);
 				});
 
 				cell = self = null;
@@ -585,9 +604,8 @@
 				: bfh;
 		}
 		,_message: function(m) {
-
-			$('<tr><td class="ui-widget ui-datagrid-align-center ui-state-error" colspan="1000">'+m+'</td></tr>')
-				.appendTo(this.uiDataGridTbody.empty()[0]);
+			this.uiDataGridTbody.empty();
+			this.uiDataGridMsgError.text(m).addClass('show-message');
 		}
 		,_ajax: function() {
 
@@ -599,6 +617,9 @@
 			
 			// clear selected rows
 			this.clearSelectedRows();
+			
+			// hide error msgs
+			this.uiDataGridMsgError.removeClass('show-message');
 
 			// local data
 			if ( undefined === url || '' === url ) {
@@ -753,11 +774,15 @@
 			return this._offset;
 		}
 		,resetOffset: function() {
+			var b;
 			this._num_rows = 0;
 			this._offset = 0;
 			if ( true === this.options.pagination ) {
 				// disable pagination buttons
-				$(this.uiDataGridTdPagination.childs).filter('button').button('disable');
+				b = $(this.uiDataGridTdPagination.childs).filter('button');
+				( this.options.ui )
+					? b.button('disable')
+					: b.prop('disabled',true);
 			}
 		}
 		,getThead: function(callback) {
@@ -789,53 +814,173 @@
 			this._createColumns();
 			this.resetOffset();
 		}
-	});
+	};
+ 		
+	var getTemplateDataGrid = function(css) {
 
-	// private
-	var _getTemplateDataGrid = function() {
-		return '<div class="ui-datagrid-container ui-widget ui-widget-content ui-corner-all">'
-			+'<div class="ui-datagrid-title"><div class="ui-widget-header"></div></div>'
+		var fw = {
+			ui: {
+				 container_cls: 'ui-widget ui-widget-content ui-corner-all'
+				,title_element: '<div class="ui-datagrid-title"><div class="ui-widget-header">Title</div></div>'
+				,table_cls: ''
+				,table_row_hover: ''
+			}
+			,bs: {
+				 container_cls: 'panel panel-default'
+				,title_element: '<div class="ui-datagrid-title panel-heading">Title</div>'
+				,table_cls: 'table table-bordered table-condensed'
+				,table_row_hover: ' table-hover'
+			}
+		};
+
+		fw = fw[ (/^(ui|bs)$/.test(css) ? css : 'ui') ];
+
+		return '<div class="ui-datagrid-container '+fw.container_cls+'">'
+			+fw.title_element
 			+'<div class="ui-datagrid-content">'
 				+'<div class="ui-datagrid-content-scroll">'
 					+'<div class="ui-datagrid-header ui-state-default">'
-						+'<table>'
+						+'<table class="table">'
 							+'<thead>'
 								+'<tr>'
-									+'<th>'
-										+'<table class="ui-datagrid">'
+									+'<th class="active">'
+										+'<table class="ui-datagrid '+fw.table_cls+'">'
 											+'<colgroup></colgroup>'
 											+'<thead>'
-												+'<tr role="rowheader"></tr>'
+												+'<tr role="rowheader" class="active"></tr>'
 											+'</thead>'
 										+'</table>'
 									+'</th>'
-									+'<th></th>'
+									+'<th class="active"></th>'
 								+'</tr>'
 							+'</thead>'
 						+'</table>'
 					+'</div>'
 					+'<div class="ui-widget-content ui-datagrid-body">'
-						+'<table class="ui-datagrid">'
+						+'<table class="ui-datagrid ui-front'+fw.table_cls+fw.table_row_hover+'">'
 							+'<colgroup></colgroup>'
 							+'<thead>'
 								+'<tr role="rowheader"></tr>'
 							+'</thead>'
 							+'<tbody></tbody>'
 						+'</table>'
+						+'<div class="ui-state-error ui-front"></div>'
 					+'</div>'
 				+'</div>'
 			+'</div>'
 			+'<div class="ui-widget ui-state-default ui-datagrid-tools">'
-				+'<table class="ui-datagrid">'
+				+'<table class="ui-datagrid '+fw.table_cls+'">'
 					+'<tbody>'
 						+'<tr>'
 							+'<td>&nbsp;</td>'
-							+'<td style="visibility:hidden"><span></span></td>'
+							+'<td><span></span></td>'
 						+'</tr>'
 					+'</tbody>'
 				+'</table>'
 			+'</div>'
 		+'</div>';
 	};
+
+	// expose jquery plugin
+	if ( $.widget ) {
+
+		var JQUERY_UI_VERSION = Number($.ui.version.replace(/[^0-9]/g,''));
+
+		$.widget('ui.datagrid',{
+			_setOption: function(option,value) {
+				if ( 'jsonStore' === option && $.isPlainObject(value) ) {
+					this.options.jsonStore = $.extend({},this.options.jsonStore,value);
+				} else {
+					( JQUERY_UI_VERSION >= 1.9 )
+						? this._super(option,value)
+						: $.Widget.prototype._setOption.apply(this,arguments);
+				}
+			}
+			,_destroy: function() {
+
+				if ( JQUERY_UI_VERSION < 1.9 ) {
+					$.Widget.prototype.destroy.call(this);
+				}
+
+				this.element.empty();
+			}
+		});
+
+		jQueryDataGrid.options.ui = true;
+		$.widget('ui.datagrid',$.ui.datagrid,jQueryDataGrid);
+		jQueryDataGrid = null;
+
+	} else {
+
+		$.extend( $.expr[ ":" ], {
+			data: $.expr.createPseudo ?
+				$.expr.createPseudo(function( dataName ) {
+					return function( elem ) {
+						return !!$.data( elem, dataName );
+					};
+				}) :
+				// support: jQuery <1.8
+				function( elem, i, match ) {
+					return !!$.data( elem, match[ 3 ] );
+				}
+		});
+
+		$.fn.datagrid = function(options,get,set) {
+
+			var returnValue = this;
+
+			this.each(function(data,elem){
+
+				data = $.data(this,'jQueryDataGrid');
+				elem = this;
+
+				if ( undefined === data ) {
+		     		$.data(this,'jQueryDataGrid',(function(){
+		     			this.options = $.extend({},this.options,options);
+		     			this.element = $(elem);
+		     			this.ui = false;
+		     			this._create();
+		     			this._init();
+		     			return this;
+		     		}).call(jQueryDataGrid));
+
+				} else {
+
+					var isMethodCall = (typeof options === "string")
+						,methodValue
+						,instance = data;
+
+					if ( isMethodCall ) {
+
+						if ( 'option' === options ) {
+							if ( undefined !== get ) {
+								if ( undefined !== set ) {
+									instance.options[get] = ( $.isPlainObject(set) )
+										? $.extend({},instance.options[get],set)
+										: set;
+								} else {
+									returnValue = instance.options[get];
+								}
+							}
+						} else {
+							methodValue = instance[ options ].apply( instance, [options]);
+
+							if ( methodValue !== instance && methodValue !== undefined ) {
+								returnValue = methodValue && /^get/i.test(options)
+									? methodValue
+									: returnValue.pushStack( methodValue.get() );
+							}
+						}
+
+						methodValue = instance = null;
+					}
+				}
+
+				data = elem = null;
+			});
+
+			return returnValue;
+		};
+	}
 
 }(jQuery,window,document));
