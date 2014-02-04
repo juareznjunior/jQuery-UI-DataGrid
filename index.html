@@ -4,70 +4,8 @@
 <meta charset='utf-8'>
 <title>juareznjunior/jQuery-UI-DataGrid @ GitHub</title>
 <link href="https://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css" />
-<link href="css/jquery.ui.datagrid.css" rel="stylesheet" type="text/css" />
-<style type="text/css">
-body { margin: 0; outline: medium none; padding: 0 !important; border: 0  !important;}
-h1 { border-width: 0 0 1px 0 !important; font-size: 1em !important;}
-h1.ui-widget-content { background: none; }
-#header { width: 900px;padding:10px 0; text-align:center;margin: 10px auto 0 auto;}
-#container { margin: 0 auto; width: 900px; position: relative}
-#container.xhidden {visibility: hidden}
-.ui-widget {font-size: 1em }
-.example > button { margin-bottom: 10px}
-.example:last-child {margin-bottom:20px}
-.ui-dialog { padding: 0.1em; position: fixed; border-width:0;-moz-box-shadow:0 2px 25px #000;-webkit-box-shadow:0 2px 25px #000;box-shadow:0 2px 25px #000}
-.ui-dialog .ui-dialog-content {padding:0 !important;}
-.ui-dialog-content .ui-container-table {padding: 1px 0;}
-.ui-dialog-content table.ui-widget-content {border:0}
-.ui-dialog .ui-dialog-title {font-weight:bold}
-.ui-widget-header.ui-corner-all { border-radius: 2px 2px 0 0;}
-.ui-dialog .ui-dialog-content .ui-widget-form {-moz-box-shadow:none;-webkit-box-shadow:none;box-shadow:none}
-.ui-autocomplete {-moz-box-shadow:0px 2px 8px #000;-webkit-box-shadow:0px 2px 8px #000;box-shadow:0px 2px 8px #000}
-.ui-tabs .ui-tabs-panel {padding:.5em}
-.ui-tabs .ui-tabs-nav li { text-shadow: none}
-.ui-dialog-content .ui-tabs-panel {padding:0.1em 0 0;border-width: 0 !important;}
-.ui-button-icon-only .ui-button-text, .ui-button-icons-only .ui-button-text { padding: .3em; text-indent: -9999999px; }
-.ui-button-text-icon-primary .ui-button-text, .ui-button-text-icons .ui-button-text { padding: .2em 1em .25em 2.1em }
-.ui-button-text-icon-secondary .ui-button-text, .ui-button-text-icons .ui-button-text { padding: .2em 2.1em .2em 1em }
-.ui-button-text-icons .ui-button-text { padding-left: 2.1em; padding-right: 2.1em; }
-.ui-button-text-only .ui-button-text {padding:0.3em 1em}
-.ui-button::-moz-focus-inner{border: 1px dotted transparent}
-.ui-dialog .ui-button.ui-dialog-titlebar-close { border: medium none; border-radius: 10px;}
-.ui-corner-tl { -moz-border-radius-topleft: 2px; -webkit-border-top-left-radius: 2px; border-top-left-radius: 2px; }
-.ui-corner-tr { -moz-border-radius-topright: 2px; -webkit-border-top-right-radius: 2px; border-top-right-radius: 2px; }
-.ui-corner-bl { -moz-border-radius-bottomleft: 2px; -webkit-border-bottom-left-radius: 2px; border-bottom-left-radius: 2px; }
-.ui-corner-br { -moz-border-radius-bottomright: 2px; -webkit-border-bottom-right-radius: 2px; border-bottom-right-radius: 2px; }
-.ui-corner-top { -moz-border-radius-topleft: 2px; -webkit-border-top-left-radius: 2px; border-top-left-radius: 2px; -moz-border-radius-topright: 2px; -webkit-border-top-right-radius: 2px; border-top-right-radius: 2px; }
-.ui-corner-bottom { -moz-border-radius-bottomleft: 2px; -webkit-border-bottom-left-radius: 2px; border-bottom-left-radius: 2px; -moz-border-radius-bottomright: 2px; -webkit-border-bottom-right-radius: 2px; border-bottom-right-radius: 2px; }
-.ui-corner-right {  -moz-border-radius-topright: 2px; -webkit-border-top-right-radius: 2px; border-top-right-radius: 2px; -moz-border-radius-bottomright: 2px; -webkit-border-bottom-right-radius: 2px; border-bottom-right-radius: 2px; }
-.ui-corner-left { -moz-border-radius-topleft: 2px; -webkit-border-top-left-radius: 2px; border-top-left-radius: 2px; -moz-border-radius-bottomleft: 2px; -webkit-border-bottom-left-radius: 2px; border-bottom-left-radius: 2px; }
-.ui-corner-all { -moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px; }
-
-tr.foo-bar-xyz td {
-	background: yellow !important
-}
-
-#example2 thead th {
-	cursor:pointer
-}
-
-.change-theme {
-	width: 190px;
-	margin: 20px auto 0;
-}
-
-body.overflow-hidden {
-	overflow-y: hidden
-}
-.full-size {
-	position: absolute;
-	top: 0;
-	bottom: 0;
-	width: 100%;
-	z-index: 100;
-	display: none;
-}
-</style>
+<link href="https://rawgithub.com/juareznjunior/jQuery-UI-DataGrid/master/css/jquery.ui.datagrid.css" rel="stylesheet" type="text/css" />
+<link href="demo.css" rel="stylesheet" type="text/css" />
 </head>
 <body class="ui-widget ui-widget-content">
 <div id="full" class="full-size"></div>
@@ -75,7 +13,6 @@ body.overflow-hidden {
 <a href="https://github.com/juareznjunior/jQuery-UI-DataGrid"><img style="position: fixed; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" /></a>
 <div id="header" class="ui-widget-header ui-corner-all">jQuery-UI-DataGrid by @juareznjunior</div>
 <div id="container" class="xhidden">
-	<div class="change-theme"><div id="themeswitcher"></div></div>
 	<div class="example">
 		<h1 class="ui-widget ui-widget-content">Example 1 - Basic Usage</h1><div id="datagrid"></div>
 	</div>
@@ -115,9 +52,8 @@ body.overflow-hidden {
 <div id="dialog-source"><pre><code data-language="javascript"></code></pre></div>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
-<script src="jquery.tablesorter.min.js"></script>
-<script src="minified/jquery.ui.datagrid.min.js"></script>
-<script src="rainbow.min.js"></script>
+<script src="https://rawgithub.com/juareznjunior/jQuery-UI-DataGrid/master/minified/jquery.ui.datagrid.min.js"></script>
+<script src="https://rawgithub.com/Mottie/tablesorter/master/js/jquery.tablesorter.min.js"></script>
 <script src="demo.js"></script>
 </body>
 </html>
