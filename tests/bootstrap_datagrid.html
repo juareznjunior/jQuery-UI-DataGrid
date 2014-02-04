@@ -13,7 +13,7 @@ body { padding: 10px 10px 0;}
 <body>
 <div id="data-grid-local"></div>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.js"></script>
-<script type="text/javascript" src="../source/jquery.datagrid.js"></script>
+<script type="text/javascript" src="../minified/jquery.ui.datagrid.min.js"></script>
 <script>
 (function($){
     var $dgLocal = $('#data-grid-local')
@@ -46,9 +46,8 @@ body { padding: 10px 10px 0;}
                 ,{"id":"23","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
             ]}
         }
-        ,cssFw: 'bs'
         ,title: 'BootStrap Tests'
-        ,pagination: false
+        ,pagination: true
         ,mapper:[{
             name: 'id',title:'Código',width:120,align:'center',sort: true
         },{

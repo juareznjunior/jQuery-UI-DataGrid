@@ -6,7 +6,7 @@
 .ui-datagrid-container th,.ui-datagrid-container td {margin:0;padding:0;border-width: 0 1px 0 0 !important;overflow: hidden;text-overflow: ellipsis}
 .ui-datagrid-header {border-width: 0  0  1px 0 !important;}
 .ui-datagrid-header .ui-state-default,.ui-datagrid-body .ui-state-default,.ui-datagrid-body .ui-widget-content {padding: 3px; vertical-align: middle;}
-.ui-datagrid-header > table > thead > tr > th:last-child {width: 17px}
+.ui-datagrid-header > table > thead > tr > th:last-child {width: 17px;}
 .ui-datagrid-body {height:200px;overflow:scroll;overflow-x:hidden;border:0;position:relative}
 .ui-datagrid-body > table {position:absolute;z-index:20;top:0}
 .ui-datagrid-body > table.ui-datagrid-gridlayout {z-index:19;height:100%;}
@@ -15,7 +15,9 @@
 .ui-datagrid-body td {font-weight:normal }
 .ui-datagrid-body tr.ui-state-hover:hover td.ui-widget-content, .ui-datagrid-body tr.ui-state-highlight td.ui-widget-content {background:none;color:inherit !important;}
 .ui-datagrid-body td .ui-button { border-width: 1px;padding:0}
-.ui-datagrid-body td.ui-state-error { border-width: 1px !important}
+.ui-datagrid-body div.ui-state-error { left: 50%;margin-left: -25%;padding: 20px 0;position: absolute;text-align: center;top: 35%;width: 50%;display: none}
+.ui-datagrid-body div.ui-state-error.show-message {display:block}
+.ui-datagrid-body .ui-front {z-index: 20}
 .ui-datagrid-tools {border-width: 1px 0 0 0 !important;}
 .ui-datagrid-tools td {padding: 3px 1px}
 .ui-datagrid-tools td:last-child {text-align:right}
@@ -36,12 +38,11 @@ th.ui-state-default.ui-datagrid-sort.tablesorter-header > .ui-button > span.ui-b
 ,th.ui-state-default.ui-datagrid-sort.tablesorter-header.tablesorter-headerDesc > .ui-button > span.ui-button-icon-secondary { background-position: 0 0 }
 /* tablesorter jquery plugin, using bootstrap */
 th.ui-state-default.ui-datagrid-sort > button > i {float: right;margin-top: -16px;}
-/* bootstrap button config */
-.panel .table th.active {padding: 0 !important}
-.panel .ui-datagrid-header .ui-datagrid th {border-bottom-width: 1px !important;}
-.panel .ui-datagrid-tools td { border-width: 1px 0 0 !important; }
-.panel .ui-datagrid-tools td:first-child .btn { margin-right: 3px }
-.panel .ui-datagrid-tools td:last-child .btn {border-color: transparent;}
-.panel .ui-datagrid-tools td:last-child .btn, .ui-datagrid-tools td:last-child span { margin-right:3px;padding: 0;}
+/* bootstrap config */
+.panel table.table>thead>tr>th.active {padding: 0 !important}
+.panel .ui-datagrid-header>table.table>thead>tr>th:last-child, .panel .ui-datagrid-header table.ui-datagrid>thead>tr>th {border-bottom-width: 1px !important;}
+.panel .ui-datagrid-tools>table.ui-datagrid>tbody>tr>td { border-width: 1px 0 0 !important; }
+.panel .ui-datagrid-tools>table.ui-datagrid>tbody>tr>td:first-child .btn { margin-right: 3px }
+.panel .ui-datagrid-tools>table.ui-datagrid>tbody>tr>td:last-child .btn {border-color: transparent;}
+.panel .ui-datagrid-tools>table.ui-datagrid>tbody>tr>td:last-child .btn, .ui-datagrid-tools>table.ui-datagrid>tbody>tr>td:last-child span { margin-right:3px;padding: 0;}
 .panel .btn:focus { outline: none; }
-.panel th.ui-datagrid-sort > button > span { float: right;margin: -18px 5px 0;}
