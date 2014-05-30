@@ -264,7 +264,7 @@
 
 				// remove tags
 				$auxTh = $(th).html(text);
-				$auxTh = $auxTh.text($auxTh.text());
+				$auxTh = $auxTh.text($auxTh.text()).data('width',obj.width);
 				
 				// align
 				$auxTh.data('text-align',al+(( /left|right|center/.test(obj.align) ) ? obj.align : 'left')).addClass(function(){
@@ -292,7 +292,7 @@
 				// hide column
 				if ( undefined !== obj.hidden ) {
 					$auxTh.data('hidden',ch).addClass(ch);
-					$(cols).last().addClass(ch);
+					$(cols[$auxTh.prev().length]).addClass(ch);
 				};
 
 			});
@@ -315,8 +315,11 @@
 				.append(cells);
 
 			// correct column width
-			$(self.uiDataGridThead[0].rows[0].cells).slice(0,-1).map(function(i,w){
-				w = Math.max($(w).innerWidth(),$(w).outerWidth());
+			$(self.uiDataGridThead[0].rows[0].cells).slice(0,-1).map(function(i,th){
+				var w = Math.max($(th).innerWidth(),$(th).outerWidth())
+					,dw = $(th).data('width')
+					,w = Math.max(w,dw);
+
 				self.uiDataGridColGroup1.children().eq(i).width(w);
 				self.uiDataGridColGroup2.children().eq(i).width(w);
 			});
