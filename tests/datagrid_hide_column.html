@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<head>
+<title>:: jQueryUI datagrid ::</title>
+<meta http-equiv="content-type" content="text/html; charset=utf8" /> 
+<meta http-equiv="content-language" content="pt-br" />
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/redmond/jquery-ui.css" rel="stylesheet" type="text/css" />
+<link href="../css/jquery.ui.datagrid.css" rel="stylesheet" type="text/css" />
+<style>
+#data-grid-local {margin:0 auto;width:500px;}
+.ui-widget { font: 11px Tahoma;}
+.ui-corner-bottom {
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+.ui-corner-right {
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+.ui-corner-left { 
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+.ui-corner-all {
+    border-radius: 2px;
+}
+</style>
+</head>
+<body>
+<div id="data-grid-local"></div>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+<script type="text/javascript" src="../minified/jquery.ui.datagrid.min.js"></script>
+<script>
+(function($){
+    var $dgLocal = $('#data-grid-local')
+        ,$style = $('<style />').data('hide',true).appendTo(document.head);
+    
+    $dgLocal.datagrid({
+        jsonStore: {
+            data: {"rows":[
+                {"id":"1","nome":"Fulano de Tal","empresa":"Empresa 1"}
+                ,{"id":"2","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"3","nome":"Beltrano da Silva","empresa":"Empresa do tal"}
+                ,{"id":"4","nome":"Beltrano da Silva","empresa":"Empresa 123122"}
+                ,{"id":"5","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"6","nome":"Beltrano da Silva","empresa":"Empresa 3312"}
+                ,{"id":"7","nome":"Beltrano da Silva","empresa":"Empresa 312"}
+                ,{"id":"8","nome":"Beltrano da Silva","empresa":"Empresa 3123122"}
+                ,{"id":"9","nome":"Fulano de Tal","empresa":"Empresa 221"}
+                ,{"id":"10","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"11","nome":"Beltrano da Silva","empresa":"Empresa 3123122"}
+                ,{"id":"12","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"13","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"14","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"15","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"16","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"17","nome":"Fulano de Tal","empresa":"Empresa 2"}
+                ,{"id":"18","nome":"Beltrano da Silva","empresa":"Empresa 1232"}
+                ,{"id":"18","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"20","nome":"Fulano de Tal","empresa":"Empresa 2"}
+                ,{"id":"21","nome":"Beltrano da Silva","empresa":"Empresa23 2"}
+                ,{"id":"22","nome":"Beltrano da Silva","empresa":"Empresa 2"}
+                ,{"id":"23","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
+            ]}
+        }
+        ,pagination:false
+        ,title: 'Simple Grid, using tablesorter jquery plugin'
+        ,mapper:[{
+            name: 'id',title:'Id',width:30,align:'center',hidden: true
+        },{
+            name: 'nome',title:'Nome',width:200,align:'left'
+        },{
+            name: 'empresa',title:'Empresa',align:'left'
+        }]
+        ,toolBarButtons:[{
+             text: 'Toggle Column Show/Hide'
+            ,click: function(btn) {
+                btn = $style.data('hide');
+                $style.text(
+                    ( true === btn )
+                        ? 'th.ui-datagrid-column-hide, tbody td.ui-datagrid-column-hide { display: table-cell } col.ui-datagrid-column-hide { display: table-column } '
+                        : ''
+                )
+                .data('hide',!btn);
+            }
+        }]
+    });
+})(jQuery)
+</script>
+</body> 
+</html>
