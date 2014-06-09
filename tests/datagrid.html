@@ -26,7 +26,7 @@
 </head>
 <body>
 <div id="data-grid-local"></div>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
 <script type="text/javascript" src="https://rawgithub.com/Mottie/tablesorter/master/js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript" src="../minified/jquery.ui.datagrid.min.js"></script>
@@ -81,7 +81,8 @@
             var cache = null;
             
             $(this).datagrid('getThead').on('mouseup','th.ui-datagrid-sort',{thead:$config.prev()[0]},function(e){
-                e = $( $(e.data.thead.rows[0].cells[this.cellIndex]).trigger('sort.tablesorter')[0].className.split(' ')).filter(function(index,val){
+
+                e = $( $(e.data.thead.rows[0].cells[this.cellIndex]).trigger('sort.tablesorter')[0].className.split(' ') ).filter(function(index,val){
                     return /tablesorter/.test(val) ? val : null;
                 }).get().join(' ');
 

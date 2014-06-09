@@ -160,17 +160,19 @@
 
 			// remove tfoot if...
 			if ( $.isArray(this.options.toolBarButtons) === false && this.options.pagination === false) {
-				$(uiDataGridTables[2].parentNode).remove();
+				$(uiDataGridTables[3].parentNode).remove();
 			}
 
 			// setters
 			this.uiDataGridThead      = $(uiDataGridTables[0].tHead);
-			this.uiDataGridTheadBody  = $(uiDataGridTables[1].tHead);
+			this.uiDataGridLayout     = $(uiDataGridTables[1].tBodies[0].rows[0]);
+			this.uiDataGridTheadBody  = $(uiDataGridTables[2].tHead);
 			this.uiDataGridColGroup1  = this.uiDataGridThead.prev();
-			this.uiDataGridColGroup2  = this.uiDataGridTheadBody.prev();
-			this.uiDataGridTbody      = $(uiDataGridTables[1].tBodies[0]);
-			this.uiDataGridMsgError   = $(uiDataGridTables[1]).parent().find('div.ui-state-error');
-			this.uiDataGridTfoot      = (this.options.pagination || $.isArray(this.options.toolBarButtons)) ? $(uiDataGridTables[2].tBodies[0]) : $([]);
+			this.uiDataGridColGroup2  = $(this.uiDataGridLayout[0].parentNode).prev();
+			this.uiDataGridColGroup3  = this.uiDataGridTheadBody.prev();
+			this.uiDataGridTbody      = $(uiDataGridTables[2].tBodies[0]);
+			this.uiDataGridMsgError   = $(uiDataGridTables[2]).next();
+			this.uiDataGridTfoot      = (this.options.pagination || $.isArray(this.options.toolBarButtons)) ? $(uiDataGridTables[3].tBodies[0]) : $([]);
 			this.uiDataGridScrollBody = $(uiDataGridTables[1].parentNode).height(this.options.height);
 			this.uiDataGridScrollMain = $(contentScroll);
 
@@ -246,15 +248,25 @@
 
 			var self   = this
 				,$auxTh = null
-				,cells  = []
-				,cols   = []
 				,text   = null
 				,sw     = 0
-				,col    = '<col></col>'
-				,th     = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
-				,al     = 'ui-datagrid-align-'
-				,ch     = 'ui-datagrid-column-hide'
+				,tplCol = '<col></col>'
+				,tplTh  = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
+				,tplTd  = '<td class="ui-widget ui-widget-content"></td>'
+				,clsAl  = 'ui-datagrid-align-'
+				,clsCh  = 'ui-datagrid-column-hide'
 				,ui     = self.options.ui;
+
+			var  $cols = $([ self.uiDataGridColGroup1[0],self.uiDataGridColGroup2[0],self.uiDataGridColGroup3[0] ]).empty()
+				 ,$trs  = $([ self.uiDataGridThead[0].rows[0],self.uiDataGridTheadBody[0].rows[0] ]).empty();
+
+			// enable row number
+			if ( self.options.rowNumber ) {
+				$cols.append( $('<col></col>').addClass('ui-datagrid-cell-rownumber') );
+				$trs.append('<th class="ui-state-default ui-datagrid-cell-rownumber" role="columnheader"></th>');
+				self.uiDataGridLayout.append(tplTd);
+				sw = 20;
+			}
 			
 			// each mapper
 			$.map(self.options.mapper,function(obj,index){
@@ -263,11 +275,11 @@
 				sw += obj.width || 0;
 
 				// remove tags
-				$auxTh = $(th).html(text);
+				$auxTh = $(tplTh).html(text);
 				$auxTh = $auxTh.text($auxTh.text()).data('width',obj.width);
 				
 				// align
-				$auxTh.data('text-align',al+(( /left|right|center/.test(obj.align) ) ? obj.align : 'left')).addClass(function(){
+				$auxTh.data('text-align',clsAl+(( /left|right|center/.test(obj.align) ) ? obj.align : 'left')).addClass(function(){
 					return $(this).data('textAlign');
 				});
 
@@ -285,34 +297,20 @@
 						});
 				}
 
-				// append
-				cols[cols.length]   = $(col).width(obj.width);
-				cells[cells.length] = $auxTh[0];
+				var  $cell = $(tplTd)
+					 ,$col  = $(tplCol).width(obj.width);
 
 				// hide column
 				if ( undefined !== obj.hidden ) {
-					$auxTh.data('hidden',ch).addClass(ch);
-					$(cols[$auxTh.prev().length]).addClass(ch);
-				};
+					$([$auxTh.data('hidden',clsCh)[0],$col[0],$cell[0]]).addClass(clsCh);
+				}
+				
+				$trs.append( $auxTh );
+				$cols.append( $col );	
+				self.uiDataGridLayout.append( $cell );
 
+				$col = $cell = obj = null;
 			});
-
-			// enable row number
-			if (self.options.rowNumber) {
-				cols.splice(0,0,$(col)[0]);
-				cells.splice(0,0,$('<th class="ui-state-default ui-datagrid-cell-rownumber" role="columnheader"></th>')[0]);
-				sw += 20;
-			}
-
-			// create colgroup cols
-			$([self.uiDataGridColGroup1[0],self.uiDataGridColGroup2[0]])
-				.empty() // update
-				.append(cols.slice(0,-1));
-
-			// create thead ths
-			$([self.uiDataGridThead[0].rows[0],self.uiDataGridTheadBody[0].rows[0]])
-				.empty() // update
-				.append(cells);
 
 			// correct column width
 			$(self.uiDataGridThead[0].rows[0].cells).slice(0,-1).map(function(i,th){
@@ -322,6 +320,7 @@
 
 				self.uiDataGridColGroup1.children().eq(i).width(w);
 				self.uiDataGridColGroup2.children().eq(i).width(w);
+				self.uiDataGridColGroup3.children().eq(i).width(w);
 			});
 
 			// enable overflow-y
@@ -329,37 +328,14 @@
 				self.uiDataGridScrollMain.width(sw);
 			}
 
-			// grid layout
-			$(self.uiDataGridTbody[0].parentNode).map(function(i,t){
-				
-				// if exists
-				i = $(t.parentNode).find('.ui-datagrid-gridlayout');
-				( i.length > 0 && i.remove() );
-
-				// clone table
-				t = $(t)
-					.clone()
-					.addClass('ui-datagrid-gridlayout')
-					.removeClass('table-hover')
-					.find('tbody')
-					.append('<tr><td class="ui-widget ui-widget-content">&nbsp;'+Array(t.tHead.rows[0].cells.length).join('</td><td class="ui-widget ui-widget-content">&nbsp;')+'</td></tr>')
-					.end()
-					.prependTo(t.parentNode);
-
-				$(t[0].tHead).remove();
-
-				// update class if rowNumber
-				if ( self.options.rowNumber ) {
-					t[0].tBodies[0].rows[0].cells[0].className = 'ui-state-default ui-datagrid-cell-rownumber';
-				}
-				
-				t = i = null;
-
-			});
-
 			$(self.uiDataGridTheadBody[0].parentNode.tHead).hide();
 			
-			cells = $auxTh = self = col = cols = th = al = null;
+			$auxTh = $trs = $cols = null;
+			tplCol = null;
+			tplTh  = null;
+			tplTd  = null;
+			clsAl  = null;
+			clsCh  = null;
 		}
 		,_createRows: function(json,origin,appendRow) {
 
@@ -860,6 +836,12 @@
 						+'</table>'
 					+'</div>'
 					+'<div class="ui-widget-content ui-datagrid-body">'
+						+'<table class="ui-datagrid ui-front table'+fw.table_cls+' ui-datagrid-gridlayout">'
+							+'<colgroup></colgroup>'
+							+'<tbody>'
+								+'<tr></tr>'
+							+'</tbody>'
+						+'</table>'
 						+'<table class="ui-datagrid ui-front'+fw.table_cls+fw.table_row_hover+'">'
 							+'<colgroup></colgroup>'
 							+'<thead>'
