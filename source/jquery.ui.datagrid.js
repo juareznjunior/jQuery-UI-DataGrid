@@ -4,7 +4,7 @@
  * @autor:.....: Juarez Gonçalves Nery Junior
  * @email:.....: juareznjunior@gmail.com
  * @twitter:...: @juareznjunior
- * @date.......: 2014-01-29
+ * @date.......: 2014-08-26
  * 
  * Use jQueryUI - Depends:
  *	 jquery.ui.core.js
@@ -12,7 +12,17 @@
  *	 jquery.ui.button.js
  * 
  */
-;(function($,window,document,undefined) {
+;(function( factory ) {
+	if ( typeof define === "function" && define.amd ) {
+
+		// AMD. Register as an anonymous module.
+		define([ "jquery" ], factory );
+	} else {
+
+		// Browser globals
+		factory( jQuery );
+	}
+}(function( $ ) {
 
 	'use strict';
 
@@ -28,16 +38,16 @@
 			 * Data Mapper
 			 * Usage:
 			 * mapper:[{
-			 *  name    : 'field_name'
+			 *   name   : 'field_name'
 			 *  ,title  : 'Field Title'
 			 *  ,width  : 50
 			 *  ,align  : 'center|left|right'
+			 *  ,sort   : true
 			 *  ,render : function(DOMCell,json.name,json) {}
 			 * }]
 			 *
 			 */
 			,mapper: []
-
 
 			/**
 			 * Scroll height
@@ -55,7 +65,7 @@
 			 * 
 			 */
 			,jsonStore: {
-				url: ''
+				 url: ''
 				,params: {}
 				,data: {}
 			}
@@ -128,6 +138,17 @@
 			 *
 			 */
 			,toolBarButtons: false
+			
+			/**
+			 * Usage:
+			 * {
+			 *     initial: integer cellIndex
+			 *    ,direction: string desc|asce
+			 *    ,remote: boolean
+			 * }
+			 *
+			 */
+			,sort: false
 		}
 		,_create: function() {
 
@@ -140,7 +161,7 @@
 			var uiDataGridTables = [],contentScroll;
 			
 			// container datagrid
-			this.uiDataGrid = $(getTemplateDataGrid( (undefined !== this.options.ui) ? 'ui' : 'bs' ));
+			this.uiDataGrid = $(getTemplateDataGrid());
 			
 			// tables in container
 			this.uiDataGrid.find('table').filter(function(){
@@ -155,7 +176,7 @@
 			if ( this.options.title === '' ) {
 				$(contentScroll.parentNode).prev().remove();
 			} else {
-				$(contentScroll.parentNode).prev().children().text(this.options.title);
+				$(contentScroll.parentNode).prev().children().html(this.options.title);
 			}
 
 			// remove tfoot if...
@@ -207,13 +228,7 @@
 						
 						if ( false === this.disabled ) {
 							trigger = $(event.data.uiDataGrid.uiDataGridTdPagination.childs).filter('button');
-
-							if ( event.data.uiDataGrid.options.ui ) {
-								trigger.removeClass('ui-state-hover ui-state-focus').button('disable');
-							} else {
-								trigger.prop('disabled',true);
-							}
-							
+							trigger.removeClass('ui-state-hover ui-state-focus').button('disable');
 							trigger = this.name.split('-').slice(-1);
 							event.data.uiDataGrid['_'+trigger+'Page']();
 							event.data.uiDataGrid.load();
@@ -234,11 +249,15 @@
 				bindClick = trigger = null;
 			});
 
-			// create pagination, initial config
-			// see _updatePagination()
 			this._createPagination();
+			
+			// cast to queryString
+			// jsonStore.params
+			// literal object (isPlainObject (json))
+			if ( $.isPlainObject(this.options.jsonStore.params) ) {
+				this.options.jsonStore.params = $.param( this.options.jsonStore.params );
+			}
 		}
-
 		,_init: function() {
 			if (this.options.autoRender) {
 				this.render();
@@ -249,34 +268,39 @@
 			var self   = this
 				,$auxTh = null
 				,text   = null
-				,sw     = 0
 				,tplCol = '<col></col>'
 				,tplTh  = '<th class="ui-widget ui-state-default" role="columnheader"></th>'
 				,tplTd  = '<td class="ui-widget ui-widget-content"></td>'
 				,clsAl  = 'ui-datagrid-align-'
 				,clsCh  = 'ui-datagrid-column-hide'
-				,ui     = self.options.ui;
+				,sw     = 0;
 
-			var  $cols = $([ self.uiDataGridColGroup1[0],self.uiDataGridColGroup2[0],self.uiDataGridColGroup3[0] ]).empty()
-				 ,$trs  = $([ self.uiDataGridThead[0].rows[0],self.uiDataGridTheadBody[0].rows[0] ]).empty();
+			var $cols = $([ self.uiDataGridColGroup1[0],self.uiDataGridColGroup2[0],self.uiDataGridColGroup3[0] ]).empty()
+				,$trs  = $([ self.uiDataGridThead[0].rows[0],self.uiDataGridTheadBody[0].rows[0] ]).empty()
+				,wcols = (100/self.options.mapper.length);
+
+			self.uiDataGridLayout.empty();
 
 			// enable row number
 			if ( self.options.rowNumber ) {
 				$cols.append( $('<col></col>').addClass('ui-datagrid-cell-rownumber') );
 				$trs.append('<th class="ui-state-default ui-datagrid-cell-rownumber" role="columnheader"></th>');
 				self.uiDataGridLayout.append(tplTd);
-				sw = 20;
 			}
 			
 			// each mapper
-			$.map(self.options.mapper,function(obj,index){
+			$.map(self.options.mapper,function(obj,width){
 			
 				text = obj.title || obj.name;
-				sw += obj.width || 0;
+				width = ( width < self.options.mapper.length - 1 )
+					? isNaN( parseFloat(obj.width) )
+						? wcols+'%'
+						: obj.width
+					: '';
 
 				// remove tags
 				$auxTh = $(tplTh).html(text);
-				$auxTh = $auxTh.text($auxTh.text()).data('width',obj.width);
+				$auxTh = $auxTh.text($auxTh.text());
 				
 				// align
 				$auxTh.data('text-align',clsAl+(( /left|right|center/.test(obj.align) ) ? obj.align : 'left')).addClass(function(){
@@ -285,20 +309,15 @@
 
 				if ( true === obj.sort ) {
 					$auxTh
-						.addClass('ui-datagrid-sort')
+						.addClass('ui-datagrid-sort ui-state-disabled')
 						.html(function(b){
 							b = $('<button>'+this.innerHTML+'</button>',{type:'button'});
-							if ( ui ) {
-								b.button({icons:{primary:'',secondary:'ui-icon-carat-2-n-s'}});
-							} else {
-								b.addClass('btn btn-default').append('<span class="glyphicon glyphicon-sort"></span>');
-							}
-							return b;
+							return b.button({icons:{primary:'',secondary:'ui-icon-carat-2-n-s'}});
 						});
 				}
 
 				var  $cell = $(tplTd)
-					 ,$col  = $(tplCol).width(obj.width);
+					,$col  = $(tplCol).width( width );
 
 				// hide column
 				if ( undefined !== obj.hidden ) {
@@ -312,21 +331,15 @@
 				$col = $cell = obj = null;
 			});
 
-			// correct column width
-			$(self.uiDataGridThead[0].rows[0].cells).slice(0,-1).map(function(i,th){
-				var w = Math.max($(th).innerWidth(),$(th).outerWidth())
-					,dw = $(th).data('width')
-					,w = Math.max(w,dw);
-
-				self.uiDataGridColGroup1.children().eq(i).width(w);
-				self.uiDataGridColGroup2.children().eq(i).width(w);
-				self.uiDataGridColGroup3.children().eq(i).width(w);
-			});
-
 			// enable overflow-y
+			self.uiDataGridColGroup1.children().map(function(){
+				sw += $(this).width();
+			});
 			if ( sw > self.element.width() ) {
 				self.uiDataGridScrollMain.width(sw);
 			}
+			
+			sw = wcols = 0;
 
 			$(self.uiDataGridTheadBody[0].parentNode.tHead).hide();
 			
@@ -336,6 +349,8 @@
 			tplTd  = null;
 			clsAl  = null;
 			clsCh  = null;
+			
+			this._sort();
 		}
 		,_createRows: function(json,origin,appendRow) {
 
@@ -345,7 +360,6 @@
 				,cls             = 'ui-widget ui-widget-content'
 				,offset          = appendRow ? (oTbody.rows.length + 1) : (self._offset + 1)
 				,localPagination = (!appendRow && 'local' === origin && self.options.pagination)
-				,ui              = self.options.ui
 				,row
 				,cell;
 
@@ -380,7 +394,7 @@
 			
 				// tr
 				row           = oTbody.insertRow(-1);
-				row.className = ui ? 'ui-state-hover' : '';
+				row.className = 'ui-state-hover';
 
 				
 				$(row)
@@ -435,6 +449,11 @@
 				self.uiDataGridScrollBody.scrollTop(0);
 			}
 			
+			// sort
+			if ( $.isPlainObject(this.options.sort) ) {
+				$( this.uiDataGridThead[0].rows[0].cells ).filter('.ui-datagrid-sort').removeClass('ui-state-disabled');
+			}
+			
 			theadThs = oTbody = row = cell = self = json = null;
 		}
 		,_createPagination: function() {
@@ -443,8 +462,6 @@
 
 				var self = this
 					,td = $(this.uiDataGridTfoot[0].rows[0].cells).last()[0]
-					,ui = self.options.ui
-					,bsicons = ['step-backward','backward','forward','step-forward']
 					,i;
 
 				// add dom span
@@ -455,18 +472,15 @@
 
 					i = b;
 
-					b = $('<button></button>',{type:'button',name:'uiDataGridSetPage-'+n,disabled:true}).text(n);
-
-					if ( ui ) {
-						b.button({
+					b = $('<button></button>',{type:'button',name:'uiDataGridSetPage-'+n})
+						.text(n)
+						.button({
 							icons: { primary: 'ui-icon-seek-'+n}
 							,text: false
-						});
-					} else {
-						b.addClass('btn btn-default btn-xs').html('<span class="glyphicon glyphicon-'+bsicons[i]+'"></span>');
-					}
-
-					b.data('uiDataGridBindClick','loadPage').appendTo(td);
+							,disabled: true
+						})
+						.data('uiDataGridBindClick','loadPage')
+						.appendTo(td);
 
 					// add dom button
 					self.uiDataGridTdPagination.childs.push(b[0]);
@@ -474,7 +488,7 @@
 					b = null;
 				});
 
-				self = td = bsicons = null;
+				self = td = null;
 			}
 
 		}
@@ -510,8 +524,8 @@
 						} else {
 							// enable buttons
 							( /uiDataGridSetPage-(first|prev)/.test(b.name) )
-								? (self._offset > 0 && b.disabled && (self.options.ui ? $(b).button('enable') : $(b).prop('disabled',false)) )
-								: (self._totalPages > currentPage && (self.options.ui ? $(b).button('enable') : $(b).prop('disabled',false)) );
+								? (self._offset > 0 && b.disabled && $(b).button('enable') )
+								: (self._totalPages > currentPage && $(b).button('enable') );
 						}
 					});
 				}(this));
@@ -523,40 +537,24 @@
 
 				// cell to append btns
 				var self = this
-					,cell = this.uiDataGridTfoot[0].rows[0].cells[0]
-					,ui = self.options.ui;
+					,cell = this.uiDataGridTfoot[0].rows[0].cells[0];
 
 				// each button
 				$.map(self.options.toolBarButtons,function(obj,idx){
 
 					var $button = $('<button></button>',{type:'button'});
 
-					obj.text  = obj.label || obj.text;
+					obj.label = obj.label || obj.text;
 					obj.click = obj.fn || obj.click;
+					obj.icons = obj.icon ? { primary:'ui-icon-'+obj.icon }: {};
 
 					delete obj.fn;
-					delete obj.label;
 
 					if ( $.isFunction(obj.click) ) {
 						$button.data('uiDataGridBindClick','toolBarButtons:'+idx+':click');
 					}
 
-					$button.text(obj.text);
-
-					if ( ui ) {
-						$button.button({
-							icons: {
-								primary: (undefined === obj.icon) ? null : 'ui-icon-'+obj.icon
-							}
-						});
-					} else {
-						$button.addClass('btn btn-default btn-xs');
-						if ( undefined !== obj.icon ) {
-							$button.prepend('<span class="glyphicon glyphicon-'+obj.icon+'"></span> ');
-						}
-					}
-
-					$button.appendTo(cell);
+					$button.button(obj).appendTo(cell);
 				});
 
 				cell = self = null;
@@ -593,6 +591,11 @@
 				,limit  = o.limit
 				,offset = this._offset
 				,store  = o.jsonStore;
+				
+			// if sort
+			if ( $.isPlainObject(this.options.sort) ) {
+				$( this.uiDataGridThead[0].rows[0].cells ).filter('.ui-datagrid-sort').addClass('ui-state-disabled');
+			}
 			
 			// clear selected rows
 			this.clearSelectedRows();
@@ -618,29 +621,17 @@
 				return;
 			}
 			
-			// serialize
-			// literal object (isPlainObject (json))
-			if ('string' === typeof store.params) {
-				store.params = (0 === offset)
-					? store.params+'&limit='+limit+'&offset='+offset
-					: store.params.replace(/(&offset=)(.+)/,'&offset='+offset);
-			} else {
+			store = null;
 			
-				// ex: obj.datagrid('option','jsonStore',{url:'foo/bar'})
-				if ( undefined === store.params ) {
-					store.params = {};
-				}
-				
-				// normalize
-				store.params.limit = limit;
-				store.params.offset = offset;
-			}
+			this.addParam({limit:limit,offset:offset});
+			
+			o = o.ajaxMethod.toLowerCase();
 			
 			// ajax
 			$.ajax({
-				type: o.ajaxMethod.toLowerCase()
+				 type: o
 				,url: url.replace(/\?.*/,'')
-				,data: store.params
+				,data: this.options.jsonStore.params
 				,dataType: 'json'
 				,context: this
 				,success: function(json) {
@@ -668,6 +659,109 @@
 					( $.isFunction(this.options.onAjaxSuccess) && this.options.onAjaxSuccess.call(this.element[0]) );
 				}
 			});
+		}
+		,_sort: function() {
+		
+			if ( !$.isPlainObject( this.options.sort ) ) {
+				return;
+			}
+		
+			var _cellIndex
+				,config = this.options.sort;
+		
+			function _text(row) {
+				return row.cells.item(_cellIndex).textContent.toLowerCase();
+			}
+
+			function _sort(a, b) {
+				var va = _text(a), vb = _text(b), n = parseInt(va, 10);
+				if (n) {
+					va = n;
+					vb = parseInt(vb, 10);
+				}
+				return va > vb ? 1 : va < vb ? -1 : 0;
+			}
+		
+			// @param event
+			function eventSort(event) {
+			
+				var th = this.parentNode;
+				
+				if ( $(th).hasClass('ui-state-disabled') ) {
+					return;
+				}
+				
+				var  self = event.data.self
+					,tr = th.parentNode
+					,cache = $.data(tr,'currentRowSort')
+					,tBody = self.uiDataGridTbody[0]
+					,i = 0
+					,rows
+					,len
+					,row
+					,orderby
+					,updateClass = $(th).hasClass('tablesorter-headerAsc')
+						? 'tablesorter-headerDesc'
+						: 'tablesorter-headerAsc'
+					,fragment = document.createDocumentFragment();
+				
+				$([th,( undefined !== cache && th !== cache ) ? cache : []])
+					.removeClass('tablesorter-header')
+					.removeClass('tablesorter-headerAsc')
+					.removeClass('tablesorter-headerDesc');
+			
+				_cellIndex = th.cellIndex;
+			
+				$.data(tr,'currentRowSort',th);
+				
+				self.addParam('order='+self.options.mapper[_cellIndex].name+'_'+updateClass.replace('tablesorter-header','').toLowerCase());
+				
+				// remote sort
+				if ( true === self.options.sort.remote && self._num_rows > self.options.limit ) {
+					self.load();
+				} else { // local sort
+					rows = tBody.rows;
+					len = rows.length;
+					
+					rows = Array.prototype.sort.call(Array.prototype.slice.call(rows, 0), _sort);
+					
+					if ( 'tablesorter-headerDesc' === updateClass ) {
+						Array.prototype.reverse.call(rows);
+					}
+					
+					while ( tBody.firstChild ) {
+						tBody.removeChild(tBody.firstChild);
+					}
+					
+					while ( row = rows[i++] ) {
+						fragment.appendChild(row);
+					}
+					
+					tBody.appendChild(fragment);
+				}
+				
+				$(th).addClass('tablesorter-header '+updateClass);
+				
+				fragment = null;
+				self = null;
+				tr = null;
+				th = null;
+				cache = null;
+				tBody = null;
+				row = null;
+				rows = null;
+			}
+			
+			if ( /^[0-9]$/.test(parseInt(config.initial,10).toString()) ) {
+				_cellIndex = config.initial;
+				$.data(
+					 this.uiDataGridThead[0].rows[0]
+					,'currentRowSort'
+					,$(this.uiDataGridThead[0].rows[0].cells[_cellIndex]).addClass('tablesorter-header tablesorter-header'+(/^(Desc|Asc)$/.test( config.direction ) ?  config.direction : 'Asc'))[0]
+				);
+			}
+			
+			this.uiDataGridThead.on('click.uiDataGridEventSort','.ui-button.ui-button-text-icon-secondary',{self:this},eventSort);
 		}
 		,render: function() {
 			var self = this,delay = 0;
@@ -753,15 +847,14 @@
 			return this._offset;
 		}
 		,resetOffset: function() {
-			var b;
 			this._num_rows = 0;
 			this._offset = 0;
 			if ( true === this.options.pagination ) {
-				// disable pagination buttons
-				b = $(this.uiDataGridTdPagination.childs).filter('button');
-				( this.options.ui )
-					? b.button('disable')
-					: b.prop('disabled',true);
+				$.map(this.uiDataGridTdPagination.childs,function(b){
+					(/span/i.test(b.tagName))
+						? $(b).text(' ')
+						: $(b).button('disable');
+				});				
 			}
 		}
 		,getThead: function(callback) {
@@ -779,7 +872,7 @@
 		,loadLocalData: function(json,callback) {
 			this.resetOffset();
 			this.options.jsonStore = {
-				url: ''
+				 url: ''
 				,params: {}
 				,data: json
 			};
@@ -793,56 +886,74 @@
 			this._createColumns();
 			this.resetOffset();
 		}
+		,addParam: function(new_params) {
+			
+			function uQs(uri, key, value) {
+				
+				var re = new RegExp("([\\?|&]?)" + key + "=.*?(&|$)", "i")
+					,separator = '&';
+					
+				return ( uri.match(re) )
+					? uri.replace(re, '$1' + key + "=" + value + '$2')
+					: uri + separator + key + "=" + value;
+			}
+			
+			var current_params = this.options.jsonStore.params;
+			
+			if ( '' !== current_params ) {
+				
+				if ( 'string' === typeof new_params ) {
+
+					new_params = new_params.replace(/^[\\?]/,'').split('&');
+
+					$.map(new_params,function(v){
+						v = v.split('=');
+						current_params = uQs(current_params,v[0],v[1]);
+					});
+				} else {
+					$.map( new_params, function(v,k){
+						current_params = uQs(current_params,k,v);
+					});
+				}
+			} else {
+				current_params = ( 'string' === typeof new_params ) ? new_params : $.param(new_params);
+			}
+			
+			this.options.jsonStore.params = current_params;
+			current_params = null;
+		}
 	};
  		
-	var getTemplateDataGrid = function(css) {
-
-		var fw = {
-			ui: {
-				 container_cls: 'ui-widget ui-widget-content ui-corner-all'
-				,title_element: '<div class="ui-datagrid-title"><div class="ui-widget-header">Title</div></div>'
-				,table_cls: ''
-				,table_row_hover: ''
-			}
-			,bs: {
-				 container_cls: 'panel panel-default'
-				,title_element: '<div class="ui-datagrid-title panel-heading">Title</div>'
-				,table_cls: 'table table-bordered table-condensed'
-				,table_row_hover: ' table-hover'
-			}
-		};
-
-		fw = fw[ (/^(ui|bs)$/.test(css) ? css : 'ui') ];
-
-		return '<div class="ui-datagrid-container '+fw.container_cls+'">'
-			+fw.title_element
+	var getTemplateDataGrid = function() {
+		return '<div class="ui-datagrid-container ui-widget ui-widget-content ui-corner-all">'
+			+'<div class="ui-datagrid-title"><div class="ui-widget-header">Title</div></div>'
 			+'<div class="ui-datagrid-content">'
 				+'<div class="ui-datagrid-content-scroll">'
 					+'<div class="ui-datagrid-header ui-state-default">'
-						+'<table class="table">'
+						+'<table>'
 							+'<thead>'
 								+'<tr>'
 									+'<th class="active">'
-										+'<table class="ui-datagrid '+fw.table_cls+'">'
+										+'<table class="ui-datagrid">'
 											+'<colgroup></colgroup>'
 											+'<thead>'
 												+'<tr role="rowheader" class="active"></tr>'
 											+'</thead>'
 										+'</table>'
 									+'</th>'
-									+'<th class="active"></th>'
+									+'<th></th>'
 								+'</tr>'
 							+'</thead>'
 						+'</table>'
 					+'</div>'
 					+'<div class="ui-widget-content ui-datagrid-body">'
-						+'<table class="ui-datagrid ui-front table'+fw.table_cls+' ui-datagrid-gridlayout">'
+						+'<table class="ui-datagrid ui-front ui-datagrid-gridlayout">'
 							+'<colgroup></colgroup>'
 							+'<tbody>'
 								+'<tr></tr>'
 							+'</tbody>'
 						+'</table>'
-						+'<table class="ui-datagrid ui-front'+fw.table_cls+fw.table_row_hover+'">'
+						+'<table class="ui-datagrid ui-front">'
 							+'<colgroup></colgroup>'
 							+'<thead>'
 								+'<tr role="rowheader"></tr>'
@@ -854,7 +965,7 @@
 				+'</div>'
 			+'</div>'
 			+'<div class="ui-widget ui-state-default ui-datagrid-tools">'
-				+'<table class="ui-datagrid '+fw.table_cls+'">'
+				+'<table class="ui-datagrid">'
 					+'<tbody>'
 						+'<tr>'
 							+'<td>&nbsp;</td>'
@@ -866,106 +977,34 @@
 		+'</div>';
 	};
 
-	// expose jquery plugin
-	if ( $.widget ) {
+	var JQUERY_UI_VERSION = Number($.ui.version.replace(/[^0-9]/g,''));
 
-		var JQUERY_UI_VERSION = Number($.ui.version.replace(/[^0-9]/g,''));
-
-		$.widget('ui.datagrid',{
-			_setOption: function(option,value) {
-				if ( 'jsonStore' === option && $.isPlainObject(value) ) {
-					this.options.jsonStore = $.extend({},this.options.jsonStore,value);
-				} else {
-					( JQUERY_UI_VERSION >= 1.9 )
-						? this._super(option,value)
-						: $.Widget.prototype._setOption.apply(this,arguments);
+	$.widget('ui.datagrid',{
+		_setOption: function(option,value) {
+			var store;
+			if ( 'jsonStore' === option && $.isPlainObject(value) ) {
+				store = this.options.jsonStore = $.extend({},this.options.jsonStore,value);
+				if ( $.isPlainObject( store.params ) ) {
+					this.options.jsonStore.params = $.param(store.params);
 				}
+				store = null;
+
+			} else {
+				( JQUERY_UI_VERSION >= 1.9 )
+					? this._super(option,value)
+					: $.Widget.prototype._setOption.apply(this,arguments);
 			}
-			,_destroy: function() {
+		}
+		,_destroy: function() {
 
-				if ( JQUERY_UI_VERSION < 1.9 ) {
-					$.Widget.prototype.destroy.call(this);
-				}
-
-				this.element.empty();
+			if ( JQUERY_UI_VERSION < 1.9 ) {
+				$.Widget.prototype.destroy.call(this);
 			}
-		});
 
-		jQueryDataGrid.options.ui = true;
-		$.widget('ui.datagrid',$.ui.datagrid,jQueryDataGrid);
-		jQueryDataGrid = null;
+			this.element.empty();
+		}
+	});
 
-	} else {
-
-		$.extend( $.expr[ ":" ], {
-			data: $.expr.createPseudo ?
-				$.expr.createPseudo(function( dataName ) {
-					return function( elem ) {
-						return !!$.data( elem, dataName );
-					};
-				}) :
-				// support: jQuery <1.8
-				function( elem, i, match ) {
-					return !!$.data( elem, match[ 3 ] );
-				}
-		});
-
-		$.fn.datagrid = function(options,get,set) {
-
-			var returnValue = this;
-
-			this.each(function(data,elem){
-
-				data = $.data(this,'jQueryDataGrid');
-				elem = this;
-
-				if ( undefined === data ) {
-		     		$.data(this,'jQueryDataGrid',(function(){
-		     			this.options = $.extend({},this.options,options);
-		     			this.element = $(elem);
-		     			this.ui = false;
-		     			this._create();
-		     			this._init();
-		     			return this;
-		     		}).call(jQueryDataGrid));
-
-				} else {
-
-					var isMethodCall = (typeof options === "string")
-						,methodValue
-						,instance = data;
-
-					if ( isMethodCall ) {
-
-						if ( 'option' === options ) {
-							if ( undefined !== get ) {
-								if ( undefined !== set ) {
-									instance.options[get] = ( $.isPlainObject(set) )
-										? $.extend({},instance.options[get],set)
-										: set;
-								} else {
-									returnValue = instance.options[get];
-								}
-							}
-						} else {
-							methodValue = instance[ options ].apply( instance, [options]);
-
-							if ( methodValue !== instance && methodValue !== undefined ) {
-								returnValue = methodValue && /^get/i.test(options)
-									? methodValue
-									: returnValue.pushStack( methodValue.get() );
-							}
-						}
-
-						methodValue = instance = null;
-					}
-				}
-
-				data = elem = null;
-			});
-
-			return returnValue;
-		};
-	}
-
-}(jQuery,window,document));
+	$.widget('ui.datagrid',$.ui.datagrid,jQueryDataGrid);
+	jQueryDataGrid = null;
+}));
