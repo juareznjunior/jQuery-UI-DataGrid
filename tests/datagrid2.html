@@ -26,31 +26,8 @@ var dataGridJSON = {
 			,{"id":"23","nome":"Fulano de Tal","empresa":"Empresa 1233332"}
 		]}
 	}             
-	,title: 'jQuery UI DataGrid - Using title and row number - jquery.tablesorter Plugin'
+	,title: 'jQuery UI DataGrid - Using title and row number - Table Sorter'
 	,pagination: false
-	,onComplete: function() {
-		var $config = $(this)
-		 .datagrid('getTbody')
-		 .parent() // table
-		 .tablesorter()
-		 .end();
-
-		var cache = null;
-
-		$(this).datagrid('getThead').on('mouseup','th.ui-datagrid-sort',{thead:$config.prev()[0]},function(e){
-		 e = $( $(e.data.thead.rows[0].cells[this.cellIndex]).trigger('sort.tablesorter')[0].className.split(' ')).filter(function(index,val){
-		     return /tablesorter/.test(val) ? val : null;
-		 }).get().join(' ');
-
-		 $( cache === null ? this : [cache,this] )
-		     .removeClass('tablesorter-header')
-		     .removeClass('tablesorter-headerAsc')
-		     .removeClass('tablesorter-headerDesc');
-		 cache = $(this).addClass(e)[0];
-
-		 e = null;
-		});
-	}
 	,mapper:[{
 		name: 'id',title:'Código',width:120,align:'center',sort: true
 	},{
@@ -58,4 +35,7 @@ var dataGridJSON = {
 	},{
 		name: 'empresa',title:'Empresa',align:'left'
 	}]
+	,sort: {
+		initial: 0, direction: 'Asc'
+	}
 }
