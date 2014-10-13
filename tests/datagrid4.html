@@ -47,31 +47,35 @@ var dataGridJSON = {
 	}
 	,title: 'jQuery UI DataGrid'
 	,rowNumber:true
-	,onClickRow: function(row) {
-		var l = [],d = [];
-		
-		$(this).datagrid('selectRow',row);
-		$dlg.data('datagrid',{dg:$(this),row:row});
-		$.each(row.cells,function(k,v){
-			l[l.length] = '<li><a href="#d'+k+'">td '+k+'</a></li>';
-			d[d.length] = '<div id="d'+k+'" class="ui-state-active ui-corner-all" style="margin:3px;padding:3px">'+v.innerHTML+'</div>';
-		})
-		
-		$dlg.css('padding','4px')
-			.html('<div><ul>'+l.join('')+'</ul>'+d.join('')+'</div>')
-			.children()
-			.height(130)
-			.tabs()
-			.end()
-			.dialog('open');
-		
-		l = d = null
+	,eventController:  {
+			tabsView: function(row) {
+			var l = [],d = [];
+			row = row.parentNode.parentNode;
+			$(this).datagrid('selectRow',row);
+			$dlg.data('datagrid',{dg:$(this),row:row});
+			$.each(row.cells,function(k,v){
+				l[l.length] = '<li><a href="#d'+k+'">td '+k+'</a></li>';
+				d[d.length] = '<div id="d'+k+'" class="ui-state-active ui-corner-all" style="margin:3px;padding:3px">'+$(v).text()+'</div>';
+			})
+			
+			$dlg.css('padding','4px')
+				.html('<div><ul>'+l.join('')+'</ul>'+d.join('')+'</div>')
+				.children()
+				.height(130)
+				.tabs()
+				.end()
+				.dialog('open');
+			
+			l = d = null
+		}
 	}
 	,mapper:[{
 		name: 'id',title:'Código',width:50,align:'center'
 	},{
 		name: 'nome',title:'Nome',width:200,align:'left'
 	},{
-		name: 'empresa',title:'Empresa',align:'left'
+		name: 'empresa',title:'Empresa',align:'left', render: function(val) {
+         return $('<a hfre="#datagrid4"></a>').text(val).data('uiDataGridBindClick','tabsView');
+      }
 	}]
 }

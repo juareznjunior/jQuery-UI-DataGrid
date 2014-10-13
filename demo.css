@@ -60,3 +60,4 @@ body.overflow-hidden {
 	z-index: 100;
 	display: none;
 }
+td.ui-widget.ui-widget-content > a { cursor: pointer;}
