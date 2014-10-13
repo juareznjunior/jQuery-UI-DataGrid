@@ -26,7 +26,7 @@
 </head>
 <body>
 <div id="data-grid-local"></div>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
 <script type="text/javascript" src="../minified/jquery.ui.datagrid.min.js"></script>
 <script>
@@ -74,15 +74,13 @@
             initial: 0, direction: 'Asc'
         }
         ,toolBarButtons:[{
-            text: 'Change Title - See console'
+             text: 'Change Title - See console'
             ,click: function(btn) {
                 btn = $(this).datagrid('option','title',(new Date()).getTime());
                 console.log( btn.datagrid('option','title') )
-
             }
         }]
-    })
-    
+    });
 })(jQuery)
 </script>
 </body> 

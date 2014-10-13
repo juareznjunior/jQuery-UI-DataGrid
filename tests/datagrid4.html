@@ -26,7 +26,7 @@
 </head>
 <body>
 <div id="data-grid-local"></div>
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
 <script type="text/javascript" src="../minified/jquery.ui.datagrid.min.js"></script>
 <script>
@@ -85,34 +85,38 @@
                 $(button).trigger('mouseleave.button').button('disable');
             }
         }]
-        ,onClickRow: function(row) {
+        ,eventController: {
+            tabsView: function(row) {
+                row = row.parentNode.parentNode;
+                $(this).datagrid('selectRow',row);
 
-            $(this).datagrid('selectRow',row);
-
-            var l = [],d = [];
-            
-            $(row.cells).each(function(k,v){
-                l[l.length] = '<li><a href="#d'+k+'">td '+k+'</a></li>';
-                d[d.length] = '<div id="d'+k+'">'+v.innerHTML+'</div>';
-            })
-            
-            $dlg.css('padding','4px')
-				.html('<div><ul>'+l.join('')+'</ul>'+d.join('')+'</div>')
-				.children()
-				.height(130)
-				.tabs()
-				.end()
-				.dialog('open')
-                .data('row',row);
-            
-            l = d = null
+                var l = [],d = [];
+                
+                $(row.cells).each(function(k,v){
+                    l[l.length] = '<li><a href="#d'+k+'">td '+k+'</a></li>';
+                    d[d.length] = '<div id="d'+k+'">'+$(v).text()+'</div>';
+                })
+                
+                $dlg.css('padding','4px')
+    				.html('<div><ul>'+l.join('')+'</ul>'+d.join('')+'</div>')
+    				.children()
+    				.height(130)
+    				.tabs()
+    				.end()
+    				.dialog('open')
+                    .data('row',row);
+                
+                l = d = null
+            }
         }
         ,mapper:[{
             name: 'id',title:'Código',width:50,align:'center'
         },{
             name: 'nome',title:'Nome',width:200,align:'left'
         },{
-            name: 'empresa',title:'Empresa',align:'left'
+            name: 'empresa',title:'Empresa',align:'left', render: function(val) {
+                return $('<a href="#"></a>').text(val).data('uiDataGridBindClick','tabsView');
+            }
         }]
     })
     
