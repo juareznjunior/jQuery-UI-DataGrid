@@ -64,7 +64,9 @@
         ,pagination:false
         ,title: 'Simple Grid, using tablesorter jquery plugin'
         ,mapper:[{
-            name: 'id',title:'Código',width:120,align:'center',sort: true
+            name: 'id',title:'Código',width:120,align:'center',sort: true, render: function(val) {
+				return val+'<input type="checkbox">';
+			}
         },{
             name: 'nome',title:'Nome',width:200,align:'left',sort: true
         },{
@@ -73,11 +75,18 @@
         ,sort: {
             initial: 0, direction: 'Asc'
         }
+		,eventController: {
+			onClickRow: function(tr,event) {
+				$(this).datagrid('selectRow',tr);
+				$(tr.cells[0]).find(':checkbox').prop('checked',$(tr).hasClass('ui-state-highlight'));
+			}
+		}
         ,toolBarButtons:[{
-             text: 'Change Title - See console'
+             text: 'Change Title'
             ,click: function(btn) {
-                btn = $(this).datagrid('option','title',(new Date()).getTime());
-                console.log( btn.datagrid('option','title') )
+				btn = $(this).datagrid('option','title').split('-');
+                $(this).datagrid('option','title', btn[0]+' - '+(new Date()).getTime());
+				btn = null;
             }
         }]
     });
