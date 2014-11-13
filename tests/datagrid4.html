@@ -7,6 +7,7 @@
 <link href="../css/jquery.ui.datagrid.css" rel="stylesheet" type="text/css" />
 <style>
 #data-grid-local {width:80%;margin:0 auto}
+#data-grid-dialog { padding:4px; display: none }
 .ui-corner-bottom {
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
@@ -22,28 +23,66 @@
 .ui-corner-all {
     border-radius: 2px;
 }
+td.ui-widget-content > a {
+	posistion: relative
+}
+td.ui-widget-content > a > span {
+	display: inline-block
+}
+.ui-widget-overlay { background: #ccc }
 </style>
 </head>
 <body>
 <div id="data-grid-local"></div>
+<div id="data-grid-dialog">
+	<div id="data-grid-tabsview">
+		<ul>
+			<li><a href="#panel-codigo">Código</a></li>
+			<li><a href="#panel-nome">Nome</a></li>
+			<li><a href="#panel-empresa">Empresa</a></li>
+		</ul>
+		<div id="panel-codigo"></div>
+		<div id="panel-nome"></div>
+		<div id="panel-empresa"></div>
+	</div>
+</div>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
 <script type="text/javascript" src="../minified/jquery.ui.datagrid.min.js"></script>
 <script>
 (function($){
     var $dgLocal = $('#data-grid-local')
-		,$dlg = $('<div />').css('padding','4px').appendTo(document.body)
-			.dialog({
-				modal: true
-				,title: 'Row data'
-				,width: 500
-				,resizable: false
-				,autoOpen: false
-				,close: function() {
-					$(this).children().tabs('destroy').remove();
-                    $dgLocal.datagrid('clearSelectedRows');
-				}
-			});
+		,$dlg = function() {
+			return $('#data-grid-dialog')
+				.dialog({
+					modal: true
+					,title: 'Row data'
+					,width: 500
+					,resizable: false
+					,autoOpen: false
+					,open: function(panels) {
+						if ( $.isFunction($tabs) ) {
+							$tabs = $tabs();
+						}
+						
+						panels = $tabs.data('ui-tabs').panels;
+						$.each($($dlg.data('row').cells).slice(1),function(k,v){
+							panels.eq(k).text($(v).text());
+						});
+						
+						panels = null;
+						
+						$tabs.tabs('option','active',0);
+						
+					}
+					,close: function() {
+						$dgLocal.datagrid('clearSelectedRows');
+					}
+				});
+		}
+		,$tabs = function() {
+			return $('#data-grid-tabsview').tabs();
+		}
     
     $dgLocal.datagrid({
         jsonStore: {
@@ -89,24 +128,12 @@
             tabsView: function(row) {
                 row = row.parentNode.parentNode;
                 $(this).datagrid('selectRow',row);
-
-                var l = [],d = [];
+				
+				$dlg = $.isFunction($dlg) ? $dlg() : $dlg;
                 
-                $(row.cells).each(function(k,v){
-                    l[l.length] = '<li><a href="#d'+k+'">td '+k+'</a></li>';
-                    d[d.length] = '<div id="d'+k+'">'+$(v).text()+'</div>';
-                })
-                
-                $dlg.css('padding','4px')
-    				.html('<div><ul>'+l.join('')+'</ul>'+d.join('')+'</div>')
-    				.children()
-    				.height(130)
-    				.tabs()
-    				.end()
-    				.dialog('open')
-                    .data('row',row);
-                
-                l = d = null
+                $dlg.data('row',row)
+					.dialog('option','title', 'Row '+row.rowIndex+' - cells content' )
+					.dialog('open');
             }
         }
         ,mapper:[{
@@ -115,7 +142,7 @@
             name: 'nome',title:'Nome',width:200,align:'left'
         },{
             name: 'empresa',title:'Empresa',align:'left', render: function(val) {
-                return $('<a href="#"></a>').text(val).data('uiDataGridBindClick','tabsView');
+                return $('<a href="#"><span class="ui-icon ui-icon-pencil"></span></a>').append('<span>'+val+'</span>').data('uiDataGridBindClick','tabsView');
             }
         }]
     })
