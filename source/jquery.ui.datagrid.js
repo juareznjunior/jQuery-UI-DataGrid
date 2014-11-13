@@ -4,7 +4,7 @@
  * @autor:.....: Juarez Gonçalves Nery Junior
  * @email:.....: juareznjunior@gmail.com
  * @twitter:...: @juareznjunior
- * @date.......: 2014-11-10
+ * @date.......: 2014-11-13
  * 
  * Use jQueryUI - Depends:
  *	 jquery.ui.core.js
@@ -57,7 +57,7 @@
 			/**
 			 * Data store and ajax config
 			 * $.ajax
-			 *  param
+			 *  params mixed Object|queryString
 			 *  url
 			 *
 			 * Local data
@@ -228,11 +228,9 @@
 
 			this._createPagination();
 			
-			// cast to queryString
-			// jsonStore.params
-			// literal object (isPlainObject (json))
-			if ( $.isPlainObject(this.options.jsonStore.params) ) {
-				this.options.jsonStore.params = $.param( this.options.jsonStore.params );
+			// toJSON
+			if ( typeof this.options.jsonStore.params === 'string' || this.options.jsonStore.params instanceof String ) {
+				this.options.jsonStore.params = this._queryStringToJSON(this.options.jsonStore.params);
 			}
 		}
 		,_init: function() {
@@ -560,11 +558,11 @@
 		}
 		,_ajax: function() {
 
-			var o       = this.options
-				,url    = o.jsonStore.url
+			var o      = this.options
 				,limit  = o.limit
 				,offset = this._offset
-				,store  = o.jsonStore;
+				,store  = o.jsonStore
+				,url    = store.url;
 				
 			// if sort
 			if ( $.isPlainObject(this.options.sort) ) {
@@ -590,22 +588,21 @@
 					this._createRows(store.data,'local');
 				}
 
-				url = null;
+				url = store = o = null;
 
 				return;
 			}
-			
-			store = null;
-			
-			this.addParam({limit:limit,offset:offset});
-			
+
+			store.params.limit  = limit
+			store.params.offset = offset;
+
 			o = o.ajaxMethod.toLowerCase();
 			
 			// ajax
 			$.ajax({
 				 type: o
 				,url: url.replace(/\?.*/,'')
-				,data: this.options.jsonStore.params
+				,data: store.params
 				,dataType: 'json'
 				,context: this
 				,success: function(json) {
@@ -633,6 +630,8 @@
 					( $.isFunction(this.options.onAjaxSuccess) && this.options.onAjaxSuccess.call(this.element[0]) );
 				}
 			});
+
+			store = o = null;
 		}
 		,_sort: function() {
 		
@@ -666,7 +665,7 @@
 					return;
 				}
 				
-				var  self = event.data.self
+				var self = event.data.self
 					,tr = th.parentNode
 					,cache = $.data(tr,'currentRowSort')
 					,tBody = self.uiDataGridTbody[0]
@@ -752,7 +751,7 @@
 		}
 		,_setupGridEvents : function(event) {
 			
-			var  target    = event.target
+			var  target   = event.target
 				,bindClick = $(target).data('uiDataGridBindClick')
 				,inputChk  = target.type === 'checkbox' ||  target.type === 'radio'
 				,trigger;
@@ -798,6 +797,27 @@
 					return inputChk;
 				}
 			}
+		}
+		/**
+		 * 
+		 * @param  queryString qs
+		 * @return Object
+		 */
+		,_queryStringToJSON : function(qs) {
+
+			qs = $.map(qs.split('&'),function(a,b){
+			  a = a.split('=');
+			  b = {};
+			  b[a[0]] = isNaN(a[1]) ? encodeURIComponent(a[1]) : ( 0 === $.trim(a[1]).length ) ? '' : Number(a[1]);
+			  return b
+			});
+
+			var obj = {};
+			$.each(qs,function(){
+			  obj = $.extend(obj,this);
+			});
+
+			return obj;
 		}
 		,render: function() {
 			var self = this,delay = 0;
@@ -860,21 +880,20 @@
 				,idx= $.inArray(row,this._selectedRows);
 				
 			if ( idx > -1 ) {
-				this._selectedRows.splice(idx,1);
 				$(row).removeClass('ui-state-highlight');
+				this._selectedRows.splice(idx,1);
 			} else {
-				this._selectedRows.push(row);
-				$(row).addClass('ui-state-highlight');
+				this._selectedRows.push($(row).addClass('ui-state-highlight')[0]);
 			}
 
 			self = null;
 		}
 		,clearSelectedRows: function() {
-			this.getSelectedRows(true).removeClass('ui-state-highlight');
+			$(this._selectedRows).removeClass('ui-state-highlight');
 			this._selectedRows = [];
 		}
-		,getSelectedRows: function(obj) {
-			return ( true === obj ) ? $(this._selectedRows) : this._selectedRows;
+		,getSelectedRows: function() {
+			return this._selectedRows;
 		}
 		,load: function() {
 			this._ajax();
@@ -925,41 +944,13 @@
 			this._createColumns();
 			this.resetOffset();
 		}
-		,addParam: function(new_params) {
-			
-			function uQs(uri, key, value) {
-				
-				var re = new RegExp("([\\?|&]?)" + key + "=.*?(&|$)", "i")
-					,separator = '&';
-					
-				return ( uri.match(re) )
-					? uri.replace(re, '$1' + key + "=" + value + '$2')
-					: uri + separator + key + "=" + value;
-			}
-			
-			var current_params = this.options.jsonStore.params;
-			
-			if ( '' !== current_params ) {
-				
-				if ( 'string' === typeof new_params ) {
 
-					new_params = new_params.replace(/^[\\?]/,'').split('&');
-
-					$.map(new_params,function(v){
-						v = v.split('=');
-						current_params = uQs(current_params,v[0],v[1]);
-					});
-				} else {
-					$.map( new_params, function(v,k){
-						current_params = uQs(current_params,k,v);
-					});
-				}
-			} else {
-				current_params = ( 'string' === typeof new_params ) ? new_params : $.param(new_params);
-			}
-			
-			this.options.jsonStore.params = current_params;
-			current_params = null;
+		/**
+		 * 
+		 * @param Object|queryString new_params
+		 */
+		,addParam: function(params) {
+			this.options.jsonStore.params = $.extend(this.options.jsonStore.params, ( $.isPlainObject(params) ) ? params : this._queryStringToJSON(params) );
 		}
 	};
  		
@@ -1017,20 +1008,36 @@
 	};
 
 	$.widget('ui.datagrid',{
-		_setOption: function(option,value) {
-			var store;
-			if ( 'jsonStore' === option && $.isPlainObject(value) ) {
-				store = this.options.jsonStore = $.extend({},this.options.jsonStore,value);
-				if ( $.isPlainObject( store.params ) ) {
-					this.options.jsonStore.params = $.param(store.params);
-				}
-				store = null;
+		_setOption: function(key,value) {
 
+			var store, self;
+
+			// $(this).datagrid('option','jsonStore',{});
+			if ( 'jsonStore' === key && $.isPlainObject(value) ) {
+
+				// helper default
+				store = {
+					 url: ' '
+					,params: {}
+					,data: {}
+				};
+
+				self = this;
+
+				$.each(value,function(k,v){
+					if ( store[k]) {
+						value[k] = ( 'params' === k )
+							? ( $.isPlainObject( v ) ) ? v : self._queryStringToJSON(v)
+							: v;
+					}
+				});
+				value = $.extend(store,value);
+				store = self = null;
 			}
 			
-			this._super(option,value);
+			this._super(key,value);
 			
-			if ( 'title' === option ) {
+			if ( 'title' === key ) {
 				this.uiDataGridScrollMain.parent().prev().children().html(value);
 			}
 		}
