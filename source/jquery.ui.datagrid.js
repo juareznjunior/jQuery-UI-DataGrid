@@ -4,7 +4,7 @@
  * @autor:.....: Juarez Gonçalves Nery Junior
  * @email:.....: juareznjunior@gmail.com
  * @twitter:...: @juareznjunior
- * @date.......: 2014-11-13
+ * @date.......: 2015-04-27
  * 
  * Use jQueryUI - Depends:
  *	 jquery.ui.core.js
@@ -328,14 +328,16 @@
 		}
 		,_createRows: function(json,origin,appendRow) {
 
-			var self             = this
+			var  self            = this
 				,theadThs        = self.getThead()[0].rows[0].cells
 				,oTbody          = appendRow ? self.uiDataGridTbody[0] : self.uiDataGridTbody.empty()[0]
 				,cls             = 'ui-widget ui-widget-content'
-				,offset          = appendRow ? (oTbody.rows.length + 1) : (self._offset + 1)
+				,offset          = Number(appendRow ? (oTbody.rows.length + 1) : (self._offset + 1))
 				,localPagination = (!appendRow && 'local' === origin && self.options.pagination)
 				,row
-				,cell;
+				,cell
+				,localPaginationStart
+				,localPaginationEnd;
 
 			// set _num_rows
 			if ( self._num_rows === 0 ) {
@@ -354,9 +356,12 @@
 			json = json.rows || json;
 
 			// local pagination
-			if ( localPagination && offset > 1) {
-				// seek?
-				json = json.slice(self._offset);
+			if ( true === localPagination ) {
+
+				localPaginationStart = offset - 1
+				localPaginationEnd   = self.options.limit + (localPaginationStart);
+
+				json = json.slice(localPaginationStart,localPaginationEnd);
 			}
 
 			$.map( json ,function(obj,i){
@@ -558,7 +563,7 @@
 		}
 		,_ajax: function() {
 
-			var o      = this.options
+			var  o      = this.options
 				,limit  = o.limit
 				,offset = this._offset
 				,store  = o.jsonStore
@@ -750,22 +755,21 @@
 			}
 		}
 		,_setupGridEvents : function(event) {
-			
+
 			var  target   = event.target
 				,bindClick = $(target).data('uiDataGridBindClick')
 				,inputChk  = target.type === 'checkbox' ||  target.type === 'radio'
 				,trigger;
-				
-			// via DOMStringMap
-			// data-ui-data-grid-bind-click=""
-			if ( undefined === bindClick && !!target.dataset ) {
-				bindClick = target.dataset['uiDataGridBindClick'];
-			}
 			
-			// closest parentNode
+			// parentNode
 			if ( undefined === bindClick ) {
-				target    = $(target).closest(':data(uiDataGridBindClick)')[0];
-				bindClick = $(target).data('uiDataGridBindClick');
+				while ( true ) {
+					target    = target.parentNode;
+					bindClick = $(target).data('uiDataGridBindClick');
+					if ( undefined !== bindClick || 'tr' === target.tagName.toLowerCase() ) {
+						break;
+					}
+				}
 				
 				if ( 'onClickRow' === bindClick ) {
 					this.options.eventController.onClickRow.call(this.element[0],target,event);
@@ -1045,6 +1049,12 @@
 			this.element.empty();
 		}
 	});
+
+	function debug(debug) {
+		if ( window.console && window.console.log ) {
+			console.log(debug);
+		}
+	}
 
 	$.widget('ui.datagrid',$.ui.datagrid,jQueryDataGrid);
 	jQueryDataGrid = null;
